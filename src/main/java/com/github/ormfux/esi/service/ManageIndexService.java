@@ -52,18 +52,24 @@ public class ManageIndexService {
         final ESResponse response = restClient.sendGetRequest(index.getConnection(), index.getName() + "/_alias/_all");
         
         if (response.isOk()) {
-            final ObjectNode responseTree = (ObjectNode) jsonService.readTreeFromPath(response.getResponseBody(), "/" + index.getName() + "/aliases");
-            final Iterator<String> aliasNamesIterator = responseTree.fieldNames();
+            final JsonNode aliasesNode = jsonService.readTreeFromPath(response.getResponseBody(), "/" + index.getName() + "/aliases");
             
-            final List<String> aliasNames = new ArrayList<>();
-            
-            while (aliasNamesIterator.hasNext()) {
-                aliasNames.add(aliasNamesIterator.next());
+            if (!aliasesNode.isMissingNode()) {
+                final ObjectNode responseTree = (ObjectNode) aliasesNode;
+                final Iterator<String> aliasNamesIterator = responseTree.fieldNames();
+                
+                final List<String> aliasNames = new ArrayList<>();
+                
+                while (aliasNamesIterator.hasNext()) {
+                    aliasNames.add(aliasNamesIterator.next());
+                }
+                
+                Collections.sort(aliasNames);
+                
+                return aliasNames;
+            } else {
+                return Collections.emptyList();
             }
-            
-            Collections.sort(aliasNames);
-            
-            return aliasNames;
             
         } else {
             return Collections.emptyList();
@@ -169,7 +175,11 @@ public class ManageIndexService {
         if (mappingResponse.isOk()) {
             final JsonNode mappingRoot = jsonService.readTreeFromPath(mappingResponse.getResponseBody(), "/" + index.getName() + "/mappings");
             
-            return jsonService.readValueFromString(mappingRoot.toString(), ESIndexMapping.class);
+            if (!mappingRoot.isMissingNode()) {
+                return jsonService.readValueFromString(mappingRoot.toString(), ESIndexMapping.class);
+            } else {
+                return null;
+            }
         } else {
             return null;
         }
@@ -181,10 +191,14 @@ public class ManageIndexService {
         if (response.isOk()) {
             final JsonNode settingsRoot = jsonService.readTreeFromPath(response.getResponseBody(), "/" + index.getName() + "/settings");
             
-            final ESIndexSettings settings = jsonService.readValueFromString(settingsRoot.toString(), ESIndexSettings.class);
-            settings.setRawSettings(response.getResponseBody());
-            
-            return settings;
+            if (!settingsRoot.isMissingNode()) {
+                final ESIndexSettings settings = jsonService.readValueFromString(settingsRoot.toString(), ESIndexSettings.class);
+                settings.setRawSettings(response.getResponseBody());
+                
+                return settings;
+            } else {
+                return null;
+            }
         } else {
             return null;
         }

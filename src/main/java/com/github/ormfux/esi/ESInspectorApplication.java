@@ -41,9 +41,6 @@ public class ESInspectorApplication extends Application {
         
         Thread.setDefaultUncaughtExceptionHandler((thread, exception) -> loggingService.addLogEntry(exception));
         
-//        InjectionContext.addBeanDefinition(ObjectMapper.class, true);
-//        final ObjectMapper jsonMapper = getBean(ObjectMapper.class);
-//        jsonMapper.activateDefaultTyping(jsonMapper.getPolymorphicTypeValidator());
         final ESConnectionUsageStatusService connectionStatusService = getBean(ESConnectionUsageStatusService.class);
         
         final ManageConnectionsController manageConnectionsController = getBean(ManageConnectionsController.class);
