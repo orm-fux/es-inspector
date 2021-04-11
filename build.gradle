@@ -1,0 +1,136 @@
+plugins {
+    id "io.freefair.lombok" version "5.3.0"
+}
+
+apply plugin: 'eclipse'
+apply plugin: 'application'
+apply plugin: 'maven'
+
+sourceCompatibility = '11'
+targetCompatibility = '11'
+
+group = 'com.github.orm-fux'
+mainClassName = 'com.github.ormfux.esi.ESInspectorMain'
+
+ext {
+    javafxVersion = '12.0.1'
+}
+
+dependencies {
+    implementation group: 'com.github.orm-fux', name: 'ormfux-simple-di', version: '1.5'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.12.2'
+    
+    implementation group: 'org.openjfx', name: 'javafx-base', version: javafxVersion, classifier: 'win'
+    implementation group: 'org.openjfx', name: 'javafx-graphics', version: javafxVersion, classifier: 'win'
+    implementation group: 'org.openjfx', name: 'javafx-controls', version: javafxVersion, classifier: 'win'
+    //implementation group: 'org.openjfx', name: 'javafx-fxml', version: javafxVersion, classifier: 'win'
+    //implementation group: 'org.openjfx', name: 'javafx-web', version: javafxVersion, classifier: 'win'
+    implementation group: 'org.openjfx', name: 'javafx-media', version: javafxVersion, classifier: 'win'
+
+    implementation group: 'org.openjfx', name: 'javafx-base', version: javafxVersion, classifier: 'mac'
+    implementation group: 'org.openjfx', name: 'javafx-graphics', version: javafxVersion, classifier: 'mac'
+    implementation group: 'org.openjfx', name: 'javafx-controls', version: javafxVersion, classifier: 'mac'
+    //implementation group: 'org.openjfx', name: 'javafx-fxml', version: javafxVersion, classifier: 'mac'
+    //implementation group: 'org.openjfx', name: 'javafx-web', version: javafxVersion, classifier: 'mac'
+    implementation group: 'org.openjfx', name: 'javafx-media', version: javafxVersion, classifier: 'mac'
+
+    implementation group: 'org.openjfx', name: 'javafx-base', version: javafxVersion, classifier: 'linux'
+    implementation group: 'org.openjfx', name: 'javafx-graphics', version: javafxVersion, classifier: 'linux'
+    implementation group: 'org.openjfx', name: 'javafx-controls', version: javafxVersion, classifier: 'linux'
+    //implementation group: 'org.openjfx', name: 'javafx-fxml', version: javafxVersion, classifier: 'linux'
+    //implementation group: 'org.openjfx', name: 'javafx-web', version: javafxVersion, classifier: 'linux'
+    implementation group: 'org.openjfx', name: 'javafx-media', version: javafxVersion, classifier: 'linux'
+
+    testImplementation 'junit:junit:4.11'
+    testImplementation 'org.assertj:assertj-core:3.12.0'
+}
+
+compileJava {
+    doFirst {
+        options.compilerArgs = [
+            '--module-path', classpath.asPath,
+            '--add-modules', 'javafx.controls,javafx.media'//,javafx.fxml,javafx.web'
+        ]
+    }
+}
+
+run {
+    doFirst {
+        jvmArgs = [
+            '--module-path', classpath.asPath,
+            '--add-modules', 'javafx.controls,javafx.media'//,javafx.fxml,javafx.web'
+        ]
+    }
+}
+
+jar {
+    manifest {
+        attributes("Version": project.version)
+    }
+}
+
+distributions {
+    win {
+        distributionBaseName = 'es-inspector-win'
+        
+        contents {
+            into('lib') {
+                from jar
+                from(project.configurations.runtimeClasspath) {
+                    exclude 'javafx-**-mac.jar', 'javafx-**-linux.jar'
+                }
+            }
+            
+            into('bin') {
+                from startScripts {
+                    exclude 'es-inspector'
+                }
+            }
+        }
+    }
+    
+    mac {
+        distributionBaseName = 'es-inspector-mac'
+        
+        contents {
+            into('lib') {
+                from jar
+                from(project.configurations.runtimeClasspath) {
+                    exclude 'javafx-**-linux.jar', 'javafx-**-win.jar'
+                }
+            }
+            
+            into('bin') {
+                from startScripts {
+                    exclude 'es-inspector.bat'
+                }
+            }
+        }
+    }
+    
+    linux {
+        distributionBaseName = 'es-inspector-linux'
+        
+        contents {
+            into('lib') {
+                from jar
+                from(project.configurations.runtimeClasspath) {
+                    exclude 'javafx-**-mac.jar', 'javafx-**-win.jar'
+                }
+            }
+            
+            into('bin') {
+                from startScripts {
+                    exclude 'es-inspector.bat'
+                }
+            }
+        }
+    }
+    
+    
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
