@@ -135,7 +135,7 @@ public class ConnectionsListView extends VBox {
         final Label filterLabel = new Label("Filter");
         viewFooter.setCenter(filterLabel);
 
-        filterField.setOnAction(e -> viewContent.setItems(connectionsController.getAllConnections().filtered(conn -> filterField.getText() == null || conn.getName().contains(filterField.getText()))));
+        filterField.textProperty().addListener((prop, oldText, newText) -> viewContent.setItems(connectionsController.getAllConnections().filtered(conn -> newText == null || conn.getName().contains(newText))));
         viewFooter.setRight(filterField);
 
         getChildren().addAll(viewHeader, viewContent, viewFooter);

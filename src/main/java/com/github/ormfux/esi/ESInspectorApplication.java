@@ -26,6 +26,10 @@ import javafx.stage.Stage;
 
 //TODO https://gist.github.com/jewelsea/1463485
 //TODO https://github.com/afester/RichTextFX
+//     https://github.com/RohitAwate/Everest/blob/master/src/main/java/com/rohitawate/everest/controllers/codearea/highlighters/JSONHighlighter.java
+
+//https://www.tutorialspoint.com/how-to-create-a-treeview-using-javafx
+//http://tutorials.jenkov.com/javafx/webview.html
 public class ESInspectorApplication extends Application {
 
     public static void start(String... args) {

@@ -1,5 +1,7 @@
 package com.github.ormfux.esi.service;
 
+import static java.util.stream.Collectors.toList;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -15,7 +17,6 @@ import com.github.ormfux.esi.model.index.ESIndex;
 import com.github.ormfux.esi.model.index.ESIndexSettings;
 import com.github.ormfux.esi.model.index.mapping.ESIndexMapping;
 import com.github.ormfux.esi.model.index.mapping.ESIndexMappingProperty;
-import com.github.ormfux.esi.model.index.mapping.ESIndexMappingPropertyField;
 import com.github.ormfux.esi.model.settings.connection.ESConnection;
 import com.github.ormfux.simple.di.annotations.Bean;
 import com.github.ormfux.simple.di.annotations.BeanConstructor;
@@ -78,44 +79,7 @@ public class ManageIndexService {
     }
     
     public List<String> findIndexMappingPropertyPaths(final ESIndex index) {
-        final ESIndexMapping mapping = findIndexMapping(index);
-        
-        if (mapping != null) {
-            final List<String> paths = mapToPropertyPaths(mapping, null);
-            Collections.sort(paths);
-            return paths;
-            
-        } else {
-            return Collections.emptyList();
-        }
-    }
-    
-    private List<String> mapToPropertyPaths(final ESIndexMapping mapping, final String prefix) {
-        final List<String> paths = new ArrayList<>();
-        
-        if (mapping.getProperties() != null) {
-            for (final Entry<String, ESIndexMapping> nestedProperty : mapping.getProperties().getProperties().entrySet()) {
-                final String nestingPrefix;
-                
-                if (prefix != null) {
-                    nestingPrefix = prefix + "." + nestedProperty.getKey();
-                } else {
-                    nestingPrefix = nestedProperty.getKey();
-                }
-                
-                paths.addAll(mapToPropertyPaths(nestedProperty.getValue(), nestingPrefix));
-                
-            }
-            
-        } else if (prefix != null) {
-            paths.add(prefix);
-            
-            if (mapping.getFields() != null) {
-                mapping.getFields().getFields().keySet().stream().map(field -> prefix + "." + field).forEach(paths::add);
-            }
-        }
-        
-        return paths;
+        return findIndexMappingProperties(index).stream().map(ESIndexMappingProperty::getPath).collect(toList()); 
     }
     
     public List<ESIndexMappingProperty> findIndexMappingProperties(final ESIndex index) {
@@ -152,18 +116,19 @@ public class ManageIndexService {
             final ESIndexMappingProperty property = new ESIndexMappingProperty();
             property.setPath(prefix);
             property.setType(mapping.getType());
-            
-            if (mapping.getFields() != null) {
-                property.setFields(mapping.getFields()
-                                          .getFields()
-                                          .entrySet()
-                                          .stream()
-                                          .map(field -> new ESIndexMappingPropertyField(field.getKey(), field.getValue().getType()))
-                                          .sorted()
-                                          .collect(Collectors.toList()));
-            }
-            
+            property.setAnalyzer(mapping.getAnalyzer());
+            property.setSearchAnalyzer(mapping.getSearchAnalyzer());
             paths.add(property);
+            
+            if (mapping.getFields() != null && mapping.getFields().getFields() != null) {
+                mapping.getFields()
+                       .getFields()
+                       .entrySet()
+                       .stream()
+                       .map(field -> mapToProperties(field.getValue(), prefix + '.' + field.getKey()))
+                       .forEach(paths::addAll);
+            } 
+            
         }
         
         return paths;

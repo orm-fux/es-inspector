@@ -11,11 +11,9 @@ import java.util.function.Supplier;
 import com.github.ormfux.esi.controller.IndexDetailsController;
 import com.github.ormfux.esi.model.index.ESIndexSettings;
 import com.github.ormfux.esi.model.index.mapping.ESIndexMappingProperty;
-import com.github.ormfux.esi.model.index.mapping.ESIndexMappingPropertyField;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.VPos;
@@ -193,20 +191,13 @@ public class IndexDetailsView extends ScrollPane {
         typeColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
         mappingTable.getColumns().add(typeColumn);
         
-        final TableColumn<ESIndexMappingProperty, String> fieldsColumn = new TableColumn<>("Fields");
-        fieldsColumn.setCellValueFactory(features -> {
-            final String columnValue;
-            final List<ESIndexMappingPropertyField> fields = features.getValue().getFields();
-            
-            if (fields != null) {
-                columnValue = fields.stream().map(field -> field.getName() + " (" + field.getType() + ")").collect(joining(", "));
-            } else {
-                columnValue = "";
-            }
-            
-            return new SimpleStringProperty(columnValue);
-        });
-        mappingTable.getColumns().add(fieldsColumn);
+        final TableColumn<ESIndexMappingProperty, String> analyzerColumn = new TableColumn<>("Analyzer");
+        analyzerColumn.setCellValueFactory(new PropertyValueFactory<>("analyzer"));
+        mappingTable.getColumns().add(analyzerColumn);
+        
+        final TableColumn<ESIndexMappingProperty, String> searchAnalyzerColumn = new TableColumn<>("Search Analyzer");
+        searchAnalyzerColumn.setCellValueFactory(new PropertyValueFactory<>("searchAnalyzer"));
+        mappingTable.getColumns().add(searchAnalyzerColumn);
         
         return mappingTable;
     }

@@ -4,6 +4,7 @@ import com.github.ormfux.esi.controller.IndexDetailsController;
 import com.github.ormfux.esi.ui.component.SourceCodeTextArea;
 
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
@@ -14,7 +15,9 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
@@ -65,7 +68,7 @@ public class IndexQueryView extends SplitPane {
         final HBox actionsBar = new HBox(2, queryLabel, searchButton);
         actionsBar.setAlignment(Pos.CENTER_LEFT);
         
-        queryField.setText("{\n  \"from\": 1,\n  \"size\": 10,\n  \"query\": {\n    \"match_all\": {}\n  },\n  \"sort\": [],\n  \"aggs\": {}\n}");
+        queryField.setText("{\n  \"from\": 0,\n  \"size\": 10,\n  \"query\": {\n    \"match_all\": {}\n  },\n  \"sort\": [],\n  \"aggs\": {}\n}");
         final ScrollPane queryContainer = new ScrollPane(queryField);
         queryContainer.setFitToHeight(true);
         queryContainer.setFitToWidth(true);
@@ -80,7 +83,9 @@ public class IndexQueryView extends SplitPane {
         final VBox propertiesSubView = new VBox(2);
         propertiesSubView.setPadding(new Insets(2));
         
-        final ListView<String> propertiesList = new ListView<>(FXCollections.observableArrayList(indexController.lookupIndexDocumentPropertyPaths()));
+        final ObservableList<String> properties = FXCollections.observableArrayList(indexController.lookupIndexDocumentPropertyPaths());
+        
+        final ListView<String> propertiesList = new ListView<>(properties);
         propertiesList.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         propertiesList.setOnMouseClicked(e -> {
             if (e.getButton() == MouseButton.PRIMARY && e.getClickCount() == 2
@@ -101,7 +106,17 @@ public class IndexQueryView extends SplitPane {
         final HBox actionsBar = new HBox(2, propertiesLabel, addButton);
         actionsBar.setAlignment(Pos.CENTER_LEFT);
         
-        propertiesSubView.getChildren().addAll(actionsBar, propertiesList);
+        final BorderPane filterBar = new BorderPane();
+        filterBar.setPadding(new Insets(2));
+
+        final Label filterLabel = new Label("Filter");
+        filterBar.setCenter(filterLabel);
+
+        final TextField filterField = new TextField();
+        filterField.textProperty().addListener((prop, oldText, newText) -> propertiesList.setItems(properties.filtered(conn -> newText == null || conn.contains(newText))));
+        filterBar.setRight(filterField);
+        
+        propertiesSubView.getChildren().addAll(actionsBar, propertiesList, filterBar);
         
         return propertiesSubView;
     }

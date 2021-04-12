@@ -54,7 +54,7 @@ public class AliasQueryView extends SplitPane {
         final HBox actionsBar = new HBox(2, queryLabel, searchButton);
         actionsBar.setAlignment(Pos.CENTER_LEFT);
         
-        queryField.setText("{\n  \"from\": 1,\n  \"size\": 10,\n  \"query\": {\n    \"match_all\": {}\n  },\n  \"sort\": [],\n  \"aggs\": {}\n}");
+        queryField.setText("{\n  \"from\": 0,\n  \"size\": 10,\n  \"query\": {\n    \"match_all\": {}\n  },\n  \"sort\": [],\n  \"aggs\": {}\n}");
         final ScrollPane queryContainer = new ScrollPane(queryField);
         queryContainer.setFitToHeight(true);
         queryContainer.setFitToWidth(true);
