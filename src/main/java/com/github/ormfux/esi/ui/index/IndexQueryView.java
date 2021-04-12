@@ -1,6 +1,8 @@
 package com.github.ormfux.esi.ui.index;
 
 import com.github.ormfux.esi.controller.IndexDetailsController;
+import com.github.ormfux.esi.model.ESSearchResult;
+import com.github.ormfux.esi.ui.component.JsonTreeView;
 import com.github.ormfux.esi.ui.component.SourceCodeTextArea;
 
 import javafx.collections.FXCollections;
@@ -14,13 +16,16 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.SplitPane;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TreeView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 
@@ -28,7 +33,9 @@ public class IndexQueryView extends SplitPane {
 
     private final TextArea queryField = new SourceCodeTextArea();
     
-    private final TextArea resultField = new TextArea();
+    private final TextArea rawResultField = new TextArea();
+    
+    private final TreeView<String> treeResultField = new JsonTreeView(); 
     
     public IndexQueryView(final IndexDetailsController indexController) {
         setPadding(new Insets(5));
@@ -42,15 +49,11 @@ public class IndexQueryView extends SplitPane {
         
         queryAndMappingView.getItems().addAll(querySubView, propertiesView);
         
-        resultField.setFont(Font.font("Courier New"));
-        resultField.setEditable(false);
-        final ScrollPane resultContainer = new ScrollPane(resultField);
-        resultContainer.setFitToHeight(true);
-        resultContainer.setFitToWidth(true);
+        final TabPane resultSubView = createResultSubView();
         
         setOrientation(Orientation.VERTICAL);
         setDividerPositions(0.5);
-        getItems().addAll(new StackPane(queryAndMappingView), new StackPane(resultContainer));
+        getItems().addAll(queryAndMappingView, resultSubView);
     }
 
     private VBox createQueryView(final IndexDetailsController indexController) {
@@ -63,7 +66,11 @@ public class IndexQueryView extends SplitPane {
         
         final Button searchButton = new Button("Search");
         searchButton.disableProperty().bind(queryField.textProperty().isEmpty());
-        searchButton.setOnAction(e -> resultField.setText(indexController.search(queryField.getText())));
+        searchButton.setOnAction(e -> {
+            final ESSearchResult searchResult = indexController.search(queryField.getText());
+            rawResultField.setText(searchResult.getResultString());
+            treeResultField.setRoot(searchResult.getFxTree());
+        });
         
         final HBox actionsBar = new HBox(2, queryLabel, searchButton);
         actionsBar.setAlignment(Pos.CENTER_LEFT);
@@ -119,5 +126,32 @@ public class IndexQueryView extends SplitPane {
         propertiesSubView.getChildren().addAll(actionsBar, propertiesList, filterBar);
         
         return propertiesSubView;
+    }
+    
+    private TabPane createResultSubView() {
+        final TabPane view = new TabPane();
+        view.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
+        
+        final Tab rawResultTab = new Tab("Raw");
+        rawResultField.setFont(Font.font("Courier New"));
+        rawResultField.setEditable(false);
+        final ScrollPane rawScroll = new ScrollPane(rawResultField);
+        rawScroll.setFitToHeight(true);
+        rawScroll.setFitToWidth(true);
+        rawResultTab.setContent(rawScroll);
+        
+        view.getTabs().add(rawResultTab);
+        
+        final Tab treeResultTab = new Tab("Tree");
+
+        final ScrollPane treeScroll = new ScrollPane(treeResultField);
+        treeScroll.setFitToHeight(true);
+        treeScroll.setFitToWidth(true);
+        treeResultTab.setContent(treeScroll);
+        
+        view.getTabs().add(treeResultTab);
+        view.getSelectionModel().select(treeResultTab);
+        
+        return view;
     }
 }

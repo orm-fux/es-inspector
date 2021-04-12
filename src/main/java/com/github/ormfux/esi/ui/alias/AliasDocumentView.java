@@ -1,6 +1,8 @@
 package com.github.ormfux.esi.ui.alias;
 
 import com.github.ormfux.esi.controller.AliasDetailsController;
+import com.github.ormfux.esi.model.ESSearchResult;
+import com.github.ormfux.esi.ui.component.JsonTreeView;
 import com.github.ormfux.esi.ui.component.SourceCodeTextArea;
 
 import javafx.collections.FXCollections;
@@ -15,11 +17,14 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TreeView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 
@@ -31,7 +36,9 @@ public class AliasDocumentView extends SplitPane {
     
     private final TextArea documentInputField = new SourceCodeTextArea();
     
-    private final TextArea resultField = new TextArea();
+    private final TextArea rawResultField = new TextArea();
+    
+    private final TreeView<String> treeResultField = new JsonTreeView(); 
     
     public AliasDocumentView(final AliasDetailsController aliasController) {
         setPadding(new Insets(5));
@@ -51,7 +58,11 @@ public class AliasDocumentView extends SplitPane {
         final Button searchButton = new Button("Search");
         searchButton.managedProperty().bind(searchButton.visibleProperty());
         searchButton.disableProperty().bind(documentIdField.textProperty().isEmpty());
-        searchButton.setOnAction(e -> resultField.setText(aliasController.searchDocument(documentIdField.getText())));
+        searchButton.setOnAction(e -> {
+            final ESSearchResult result = aliasController.searchDocument(documentIdField.getText());
+            rawResultField.setText(result.getResultString());
+            treeResultField.setRoot(result.getFxTree());
+        });
         
         final Button deleteButton = new Button("Delete");
         deleteButton.managedProperty().bind(deleteButton.visibleProperty());
@@ -60,14 +71,18 @@ public class AliasDocumentView extends SplitPane {
             final Alert alert = new Alert(AlertType.NONE, "Really delete the document '" + documentIdField.getText() + "'?", ButtonType.CANCEL, ButtonType.OK);
             
             if (alert.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
-                resultField.setText(aliasController.deleteDocument(documentIdField.getText()));
+                rawResultField.setText(aliasController.deleteDocument(documentIdField.getText()));
+                treeResultField.setRoot(null);
             }
         });
         
         final Button saveButton = new Button("Save");
         saveButton.managedProperty().bind(saveButton.visibleProperty());
         saveButton.disableProperty().bind(documentInputField.textProperty().isEmpty().or(documentIdField.textProperty().isEmpty()));
-        saveButton.setOnAction(e -> resultField.setText(aliasController.saveDocument(documentIdField.getText(), documentInputField.getText())));
+        saveButton.setOnAction(e -> {
+            rawResultField.setText(aliasController.saveDocument(documentIdField.getText(), documentInputField.getText()));
+            treeResultField.setRoot(null);
+        });
         
         actionsBox.getChildren().addAll(actionCombobox, idLabel, documentIdField, saveButton, searchButton, deleteButton);
         
@@ -115,15 +130,42 @@ public class AliasDocumentView extends SplitPane {
         
         documentSubView.getChildren().addAll(actionsBox, documentInputContainer);
         
-        resultField.setFont(Font.font("Courier New"));
-        resultField.setEditable(false);
-        final ScrollPane resultContainer = new ScrollPane(resultField);
+        rawResultField.setFont(Font.font("Courier New"));
+        rawResultField.setEditable(false);
+        final ScrollPane resultContainer = new ScrollPane(rawResultField);
         resultContainer.setFitToHeight(true);
         resultContainer.setFitToWidth(true);
         
         setOrientation(Orientation.VERTICAL);
-        setDividerPositions(0.2);
-        getItems().addAll(new StackPane(documentSubView), new StackPane(resultContainer));
+        setDividerPositions(0.3);
+        getItems().addAll(documentSubView, createResultSubView());
+    }
+    
+    private TabPane createResultSubView() {
+        final TabPane view = new TabPane();
+        view.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
+        
+        final Tab rawResultTab = new Tab("Raw");
+        rawResultField.setFont(Font.font("Courier New"));
+        rawResultField.setEditable(false);
+        final ScrollPane rawScroll = new ScrollPane(rawResultField);
+        rawScroll.setFitToHeight(true);
+        rawScroll.setFitToWidth(true);
+        rawResultTab.setContent(rawScroll);
+        
+        view.getTabs().add(rawResultTab);
+        
+        final Tab treeResultTab = new Tab("Tree");
+
+        final ScrollPane treeScroll = new ScrollPane(treeResultField);
+        treeScroll.setFitToHeight(true);
+        treeScroll.setFitToWidth(true);
+        treeResultTab.setContent(treeScroll);
+        
+        view.getTabs().add(treeResultTab);
+        view.getSelectionModel().select(rawResultTab);
+        
+        return view;
     }
     
     private static enum DocumentAction {

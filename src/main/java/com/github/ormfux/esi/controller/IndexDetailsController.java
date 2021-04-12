@@ -3,6 +3,7 @@ package com.github.ormfux.esi.controller;
 import java.util.List;
 
 import com.github.ormfux.esi.model.ESResponse;
+import com.github.ormfux.esi.model.ESSearchResult;
 import com.github.ormfux.esi.model.index.ESIndex;
 import com.github.ormfux.esi.model.index.ESIndexSettings;
 import com.github.ormfux.esi.model.index.mapping.ESIndexMappingProperty;
@@ -35,12 +36,15 @@ public class IndexDetailsController {
         this.jsonService = jsonService;
     }
     
-    public String search(final String query) {
-        return returnResponseContent(restClient.sendPostRequest(index.getConnection(), index.getName() + "/_search?pretty", query));
+    public ESSearchResult search(final String query) {
+        final String esResponse = returnResponseContent(restClient.sendPostRequest(index.getConnection(), index.getName() + "/_search?pretty", query));
+        
+        return new ESSearchResult(esResponse, jsonService.createJsonFXTree(esResponse, 3));
     }
     
-    public String searchDocument(final String documentId) {
-        return returnResponseContent(restClient.sendGetRequest(index.getConnection(), index.getName() + "/_doc/" + documentId + "?pretty"));
+    public ESSearchResult searchDocument(final String documentId) {
+        final String esResponse = returnResponseContent(restClient.sendGetRequest(index.getConnection(), index.getName() + "/_doc/" + documentId + "?pretty"));
+        return new ESSearchResult(esResponse, jsonService.createJsonFXTree(esResponse, 300));
     }
     
     public String searchDocumentForUpdate(final String documentId) {

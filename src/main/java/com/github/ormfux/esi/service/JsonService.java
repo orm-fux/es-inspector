@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.ormfux.esi.exception.ApplicationException;
+import com.github.ormfux.esi.ui.component.JsonNodeTree;
 import com.github.ormfux.simple.di.annotations.Bean;
 import com.github.ormfux.simple.di.annotations.BeanConstructor;
 
@@ -19,6 +20,17 @@ public class JsonService {
     public JsonService() {
         jsonMapper = new ObjectMapper();
         jsonMapper.activateDefaultTyping(jsonMapper.getPolymorphicTypeValidator());
+    }
+    
+    public JsonNodeTree createJsonFXTree(final String json, final int initialExpandedLevels) {
+        try {
+            final JsonNode jsonRootNote = jsonMapper.readTree(json);
+            
+            return new JsonNodeTree(jsonRootNote, initialExpandedLevels);
+        } catch (JsonProcessingException e) {
+            //swallow this Exception for easy hiding in UI.
+            return null;
+        }
     }
     
     public String findNodeAsString(final String json, final String nodeName) {

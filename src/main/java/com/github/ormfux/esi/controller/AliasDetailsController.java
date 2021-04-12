@@ -1,6 +1,7 @@
 package com.github.ormfux.esi.controller;
 
 import com.github.ormfux.esi.model.ESResponse;
+import com.github.ormfux.esi.model.ESSearchResult;
 import com.github.ormfux.esi.model.alias.ESMultiIndexAlias;
 import com.github.ormfux.esi.service.ESRestClient;
 import com.github.ormfux.esi.service.JsonService;
@@ -31,16 +32,18 @@ public class AliasDetailsController {
         this.jsonService = jsonService;
     }
     
-    public String search(final String query) {
-        return returnResponseContent(doSearch(query));
+    public ESSearchResult search(final String query) {
+        final String esResponse = returnResponseContent(doSearch(query));
+        return new ESSearchResult(esResponse, jsonService.createJsonFXTree(esResponse, 3));
     }
 
     private ESResponse doSearch(final String query) {
         return restClient.sendPostRequest(alias.getConnection(), alias.getName() + "/_search?pretty", query);
     }
     
-    public String searchDocument(final String documentId) {
-        return returnResponseContent(doSearchDocument(documentId));
+    public ESSearchResult searchDocument(final String documentId) {
+        final String esResponse = returnResponseContent(doSearchDocument(documentId));
+        return new ESSearchResult(esResponse, jsonService.createJsonFXTree(esResponse, 300));
     }
 
     private ESResponse doSearchDocument(final String documentId) {
