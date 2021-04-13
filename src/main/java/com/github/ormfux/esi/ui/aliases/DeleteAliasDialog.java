@@ -31,6 +31,9 @@ public class DeleteAliasDialog extends Dialog<String> {
         
         final Button okButton = (Button) dialogPane.lookupButton(ButtonType.OK);
         
+        final Button cancelButton = (Button)dialogPane.lookupButton(ButtonType.CANCEL);
+        cancelButton.setText("Cancel");
+        
         defineInputInteractions(okButton);
         
         setTitle("Delete Alias for Index");

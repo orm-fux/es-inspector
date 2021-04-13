@@ -18,6 +18,8 @@ public class LogEntry {
     
     private String details;
     
+    private String detailsUnformatted;
+    
     public enum Level {
         INFO,
         

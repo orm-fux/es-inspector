@@ -33,6 +33,7 @@ public class LoggingService {
         
         if (esResponse.getResponseBody() != null) {
             logEntry.setDetails(esResponse.getResponseBody().replaceAll("(\n\r)|\n|\r", " "));
+            logEntry.setDetailsUnformatted(esResponse.getResponseBody());
         }
         
         addLogEntry(logEntry);
@@ -49,6 +50,7 @@ public class LoggingService {
         
         if (requestBody != null) {
             logEntry.setDetails(requestBody.replaceAll("(\n\r)|\n|\r", " "));
+            logEntry.setDetailsUnformatted(requestBody);
         }
         
         addLogEntry(logEntry);

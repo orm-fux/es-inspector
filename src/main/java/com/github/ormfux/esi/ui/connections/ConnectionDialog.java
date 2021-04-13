@@ -55,6 +55,9 @@ public class ConnectionDialog extends Dialog<ESConnection> {
         okButton.setDisable(true);
         okButton.setText("Save");
         
+        final Button cancelButton = (Button)dialogPane.lookupButton(ButtonType.CANCEL);
+        cancelButton.setText("Cancel");
+        
         testButton.setOnAction(e -> {
             final ESConnection testConnection = new ESConnection();
             fillResult(testConnection);
