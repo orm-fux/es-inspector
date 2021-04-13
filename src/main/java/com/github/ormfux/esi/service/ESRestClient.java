@@ -86,16 +86,18 @@ public class ESRestClient {
                     stream.write(requestBody.getBytes(StandardCharsets.UTF_8));
                 }
                 
-                if (http.getResponseCode() >= 200 && http.getResponseCode() < 300) {
-                    InputStream inputStream = http.getInputStream();
-                    
-                    final String responseBody = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))
-                                .lines()
-                                .collect(Collectors.joining("\n"));
-                    response = new ESResponse(http.getResponseCode(), http.getResponseMessage(), responseBody);
+                final InputStream inputStream;
+                
+                if (http.getResponseCode() >= 200 && http.getResponseCode() < 400) {
+                    inputStream = http.getInputStream();
                 } else {
-                    response = new ESResponse(http.getResponseCode(), http.getResponseMessage(), null);
+                    inputStream = http.getErrorStream();
                 }
+                    
+                final String responseBody = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))
+                            .lines()
+                            .collect(Collectors.joining("\n"));
+                response = new ESResponse(http.getResponseCode(), http.getResponseMessage(), responseBody);
                 
                 return response;
             } finally {
