@@ -42,9 +42,6 @@ public class CreateIndexDialog extends Dialog<CreateIndexDialog.CreateData> {
         okButton.setDisable(true);
         okButton.setText("Save");
         
-        final Button cancelButton = (Button)dialogPane.lookupButton(ButtonType.CANCEL);
-        cancelButton.setText("Cancel");
-        
         defineInputInteractions(okButton);
         
         Platform.runLater(() -> nameField.requestFocus());

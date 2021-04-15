@@ -294,7 +294,7 @@ public class IndexQueryView extends SplitPane {
         
         guidedQueryFields.stream()
                          .filter(field -> "must".equals(field.getRequired().getSelectionModel().getSelectedItem()))
-                         .filter(field -> field.getPropertyName().getSelectionModel().getSelectedItem() == null)
+                         .filter(field -> field.getPropertyName().getSelectionModel().getSelectedItem() != null)
                          .map(this::mapGuidedCondition)
                          .forEach(mustConditions::add);
         
@@ -303,7 +303,7 @@ public class IndexQueryView extends SplitPane {
         
         guidedQueryFields.stream()
                          .filter(field -> "must_not".equals(field.getRequired().getSelectionModel().getSelectedItem()))
-                         .filter(field -> field.getPropertyName().getSelectionModel().getSelectedItem() == null)
+                         .filter(field -> field.getPropertyName().getSelectionModel().getSelectedItem() != null)
                          .map(this::mapGuidedCondition)
                          .forEach(mustNotConditions::add);
         
@@ -312,7 +312,7 @@ public class IndexQueryView extends SplitPane {
         
         guidedQueryFields.stream()
                          .filter(field -> "should".equals(field.getRequired().getSelectionModel().getSelectedItem()))
-                         .filter(field -> field.getPropertyName().getSelectionModel().getSelectedItem() == null)
+                         .filter(field -> field.getPropertyName().getSelectionModel().getSelectedItem() != null)
                          .map(this::mapGuidedCondition)
                          .forEach(shouldConditions::add);
         
