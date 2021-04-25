@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -18,6 +19,14 @@ public class ImageRegistry {
         }
         
         return IMAGES.get(key);
+    }
+    
+    public static ImageView getImageView(final ImageKey key, final double width, final double height) {
+        final ImageView imageView = new ImageView(getImage(key));
+        imageView.setFitHeight(height);
+        imageView.setFitWidth(width);
+        
+        return imageView;
     }
     
 }

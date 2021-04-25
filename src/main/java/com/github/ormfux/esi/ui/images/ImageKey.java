@@ -21,6 +21,8 @@ public enum ImageKey {
     
     INDEX("index.png"),
     
+    RUNNING_TASK("task.gif"),
+    
     ALIAS("alias.png"),
     
     APPLICATION("esg-icon.png");

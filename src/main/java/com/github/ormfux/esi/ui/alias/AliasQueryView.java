@@ -2,13 +2,14 @@ package com.github.ormfux.esi.ui.alias;
 
 import com.github.ormfux.esi.controller.AliasDetailsController;
 import com.github.ormfux.esi.model.ESSearchResult;
+import com.github.ormfux.esi.ui.component.AsyncButton;
 import com.github.ormfux.esi.ui.component.JsonTreeView;
 import com.github.ormfux.esi.ui.component.SourceCodeTextArea;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
@@ -16,7 +17,6 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.control.TextArea;
-import javafx.scene.control.TreeView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -27,7 +27,7 @@ public class AliasQueryView extends SplitPane {
     
     private final TextArea rawResultField = new SourceCodeTextArea();
     
-    private final TreeView<String> treeResultField = new JsonTreeView(); 
+    private final JsonTreeView treeResultField = new JsonTreeView(); 
     
     public AliasQueryView(final AliasDetailsController aliasController) {
         setPadding(new Insets(5));
@@ -49,14 +49,15 @@ public class AliasQueryView extends SplitPane {
         queryLabel.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(queryLabel, Priority.ALWAYS);
         
-        final Button searchButton = new Button("Search");
-        searchButton.disableProperty().bind(queryField.textProperty().isEmpty());
-        searchButton.setOnAction(e -> {
+        final AsyncButton searchButton = new AsyncButton("Search");
+        final Node runningIcon = searchButton.getRunningIndicator();
+        searchButton.disableProperty().bind(queryField.textProperty().isEmpty().or(runningIcon.visibleProperty()));
+        searchButton.setAction(() -> {
             final ESSearchResult searchResult = aliasController.search(queryField.getText());
             rawResultField.setText(searchResult.getResultString());
-            treeResultField.setRoot(searchResult.getFxTree());
-        });        
-        final HBox actionsBar = new HBox(2, queryLabel, searchButton);
+            treeResultField.setTree(searchResult.getFxTree());
+        });
+        final HBox actionsBar = new HBox(2, queryLabel, searchButton, runningIcon);
         actionsBar.setAlignment(Pos.CENTER_LEFT);
         
         queryField.setText("{\n  \"from\": 0,\n  \"size\": 10,\n  \"query\": {\n    \"match_all\": {}\n  },\n  \"sort\": [],\n  \"aggs\": {}\n}");

@@ -6,6 +6,7 @@ import com.github.ormfux.esi.controller.GodModeController;
 import com.github.ormfux.esi.model.ESResponse;
 import com.github.ormfux.esi.model.settings.connection.ESConnection;
 import com.github.ormfux.esi.ui.ESConnectedView;
+import com.github.ormfux.esi.ui.component.AsyncButton;
 import com.github.ormfux.esi.ui.component.SourceCodeTextArea;
 import com.github.ormfux.esi.ui.images.ImageKey;
 import com.github.ormfux.esi.ui.images.ImageRegistry;
@@ -13,7 +14,7 @@ import com.github.ormfux.esi.ui.images.ImageRegistry;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
+import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -95,18 +96,21 @@ public class GodModeTab extends Tab implements ESConnectedView {
         final TextField endpointField = new TextField();
         HBox.setHgrow(endpointField, Priority.ALWAYS);
         
-        final Button searchButton = new Button("Execute");
-        searchButton.disableProperty().bind(httpMethodBox.getSelectionModel().selectedItemProperty().isNull()
-                                                .or(endpointField.textProperty().isEmpty()));
-        searchButton.setOnAction(e -> {
-            final ESResponse response = godModeController.executeRequest(httpMethodBox.getSelectionModel().getSelectedItem(), endpointField.getText(), queryField.getText());
-            
-            responseCodeText.setText(response.getResponseCode() + "");
-            responseMessageText.setText(response.getResponseMessage());
-            resultField.setText(response.getResponseBody());
-        });
+        final AsyncButton searchButton = new AsyncButton("Execute");
+        final Node runningIcon = searchButton.getRunningIndicator();
         
-        final HBox actionsBar = new HBox(2, httpMethodBox, baseUrlText, endpointField, searchButton);
+        searchButton.disableProperty().bind(httpMethodBox.getSelectionModel().selectedItemProperty().isNull()
+                                                .or(endpointField.textProperty().isEmpty())
+                                                .or(runningIcon.visibleProperty()));
+        searchButton.setAction(() -> {
+                final ESResponse response = godModeController.executeRequest(httpMethodBox.getSelectionModel().getSelectedItem(), endpointField.getText(), queryField.getText());
+                
+                responseCodeText.setText(response.getResponseCode() + "");
+                responseMessageText.setText(response.getResponseMessage());
+                resultField.setText(response.getResponseBody());
+            });
+        
+        final HBox actionsBar = new HBox(2, httpMethodBox, baseUrlText, endpointField, searchButton, runningIcon);
         actionsBar.setAlignment(Pos.CENTER_LEFT);
         
         final ScrollPane queryContainer = new ScrollPane(queryField);

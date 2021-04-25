@@ -2,6 +2,7 @@ package com.github.ormfux.esi.ui.alias;
 
 import com.github.ormfux.esi.controller.AliasDetailsController;
 import com.github.ormfux.esi.model.ESSearchResult;
+import com.github.ormfux.esi.ui.component.AsyncButton;
 import com.github.ormfux.esi.ui.component.JsonTreeView;
 import com.github.ormfux.esi.ui.component.SourceCodeTextArea;
 
@@ -9,9 +10,9 @@ import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -22,7 +23,6 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.control.TreeView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -38,7 +38,7 @@ public class AliasDocumentView extends SplitPane {
     
     private final TextArea rawResultField = new SourceCodeTextArea();
     
-    private final TreeView<String> treeResultField = new JsonTreeView(); 
+    private final JsonTreeView treeResultField = new JsonTreeView(); 
     
     public AliasDocumentView(final AliasDetailsController aliasController) {
         setPadding(new Insets(5));
@@ -55,36 +55,37 @@ public class AliasDocumentView extends SplitPane {
         
         final Label idLabel = new Label("Document Id: ");
         
-        final Button searchButton = new Button("Search");
+        final AsyncButton searchButton = new AsyncButton("Search");
         searchButton.managedProperty().bind(searchButton.visibleProperty());
-        searchButton.disableProperty().bind(documentIdField.textProperty().isEmpty());
-        searchButton.setOnAction(e -> {
+        final Node runningIcon = searchButton.getRunningIndicator();
+        searchButton.disableProperty().bind(documentIdField.textProperty().isEmpty().or(runningIcon.visibleProperty()));
+        searchButton.setAction(() -> {
             final ESSearchResult result = aliasController.searchDocument(documentIdField.getText());
             rawResultField.setText(result.getResultString());
-            treeResultField.setRoot(result.getFxTree());
+            treeResultField.setTree(result.getFxTree());
         });
         
-        final Button deleteButton = new Button("Delete");
+        final AsyncButton deleteButton = new AsyncButton("Delete", runningIcon);
         deleteButton.managedProperty().bind(deleteButton.visibleProperty());
-        deleteButton.disableProperty().bind(documentIdField.textProperty().isEmpty());
-        deleteButton.setOnAction(e -> {
+        deleteButton.disableProperty().bind(documentIdField.textProperty().isEmpty().or(runningIcon.visibleProperty()));
+        deleteButton.setAction(() -> {
             final Alert alert = new Alert(AlertType.NONE, "Really delete the document '" + documentIdField.getText() + "'?", ButtonType.CANCEL, ButtonType.OK);
             
             if (alert.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
                 rawResultField.setText(aliasController.deleteDocument(documentIdField.getText()));
-                treeResultField.setRoot(null);
+                treeResultField.setTree(null);
             }
         });
         
-        final Button saveButton = new Button("Save");
+        final AsyncButton saveButton = new AsyncButton("Save", runningIcon);
         saveButton.managedProperty().bind(saveButton.visibleProperty());
-        saveButton.disableProperty().bind(documentInputField.textProperty().isEmpty().or(documentIdField.textProperty().isEmpty()));
-        saveButton.setOnAction(e -> {
+        saveButton.disableProperty().bind(documentInputField.textProperty().isEmpty().or(documentIdField.textProperty().isEmpty()).or(runningIcon.visibleProperty()));
+        saveButton.setAction(() -> {
             rawResultField.setText(aliasController.saveDocument(documentIdField.getText(), documentInputField.getText()));
-            treeResultField.setRoot(null);
+            treeResultField.setTree(null);
         });
         
-        actionsBox.getChildren().addAll(actionCombobox, idLabel, documentIdField, saveButton, searchButton, deleteButton);
+        actionsBox.getChildren().addAll(actionCombobox, idLabel, documentIdField, saveButton, searchButton, deleteButton, runningIcon);
         
         actionCombobox.getSelectionModel().selectedItemProperty().addListener((prop, oldSel, newSel) -> {
             documentInputField.setVisible(false);

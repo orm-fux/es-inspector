@@ -6,6 +6,7 @@ import com.github.ormfux.esi.model.LogEntry.Level;
 import com.github.ormfux.esi.model.settings.connection.ESConnection;
 import com.github.ormfux.simple.di.annotations.Bean;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import lombok.Getter;
@@ -69,9 +70,11 @@ public class LoggingService {
         addLogEntry(logEntry);
     }
     
-    public void addLogEntry(final LogEntry logEntry) {
-        logEntries.add(logEntry);
-        capSize();
+    public synchronized void addLogEntry(final LogEntry logEntry) {
+        Platform.runLater(() -> {
+            logEntries.add(logEntry);
+            capSize();
+        });
     }
 
     private void capSize() {

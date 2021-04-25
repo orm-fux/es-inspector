@@ -8,6 +8,7 @@ import java.util.StringJoiner;
 
 import com.github.ormfux.esi.controller.IndexDetailsController;
 import com.github.ormfux.esi.model.ESSearchResult;
+import com.github.ormfux.esi.ui.component.AsyncButton;
 import com.github.ormfux.esi.ui.component.JsonTreeView;
 import com.github.ormfux.esi.ui.component.SourceCodeTextArea;
 
@@ -29,7 +30,6 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.control.TreeView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
@@ -57,7 +57,7 @@ public class IndexQueryView extends SplitPane {
     
     private final TextArea rawResultField = new SourceCodeTextArea();
     
-    private final TreeView<String> treeResultField = new JsonTreeView(); 
+    private final JsonTreeView treeResultField = new JsonTreeView(); 
     
     public IndexQueryView(final IndexDetailsController indexController) {
         setPadding(new Insets(5));
@@ -78,9 +78,10 @@ public class IndexQueryView extends SplitPane {
         final Label queryTypeLabel = new Label("Query Type");
         queryTypeLabel.setMaxWidth(Double.MAX_VALUE);
         
-        final Button searchButton = new Button("Search");
-        searchButton.disableProperty().bind(queryField.textProperty().isEmpty());
-        searchButton.setOnAction(e -> {
+        final AsyncButton searchButton = new AsyncButton("Search");
+        final Node runningIcon = searchButton.getRunningIndicator();
+        searchButton.disableProperty().bind(queryField.textProperty().isEmpty().or(runningIcon.visibleProperty()));
+        searchButton.setAction(() -> {
             final ESSearchResult searchResult;
             
             switch (queryTypeField.getSelectionModel().getSelectedItem()) {
@@ -89,7 +90,6 @@ public class IndexQueryView extends SplitPane {
                     break;
                 case "Guided Boolean":
                     final String guidedQuery = buildGuidedQuery();
-                    System.out.println(guidedQuery);
                     searchResult = indexController.search(guidedQuery);
                     break;
                 default:
@@ -97,10 +97,10 @@ public class IndexQueryView extends SplitPane {
             }
             
             rawResultField.setText(searchResult.getResultString());
-            treeResultField.setRoot(searchResult.getFxTree());
+            treeResultField.setTree(searchResult.getFxTree());
         });
         
-        final HBox actionsBar = new HBox(2, queryTypeLabel, queryTypeField, searchButton);
+        final HBox actionsBar = new HBox(2, queryTypeLabel, queryTypeField, searchButton, runningIcon);
         actionsBar.setAlignment(Pos.CENTER_LEFT);
         actionsBar.setPadding(new Insets(2));
         

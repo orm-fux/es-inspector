@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.github.ormfux.esi.service.JsonService;
 import com.github.ormfux.simple.di.InjectionContext;
 
+import javafx.application.Platform;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
@@ -53,6 +54,10 @@ public class JsonTreeView extends TreeView<String> {
                 clipboard.setContent(clipboardContent);
             }
         });
+    }
+    
+    public void setTree(final JsonNodeTree tree) {
+        Platform.runLater(() -> setRoot(tree));
     }
     
 }
