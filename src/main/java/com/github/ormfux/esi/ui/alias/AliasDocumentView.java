@@ -36,7 +36,7 @@ public class AliasDocumentView extends SplitPane {
     
     private final TextArea documentInputField = new SourceCodeTextArea();
     
-    private final TextArea rawResultField = new TextArea();
+    private final TextArea rawResultField = new SourceCodeTextArea();
     
     private final TreeView<String> treeResultField = new JsonTreeView(); 
     
@@ -130,7 +130,6 @@ public class AliasDocumentView extends SplitPane {
         
         documentSubView.getChildren().addAll(actionsBox, documentInputContainer);
         
-        rawResultField.setFont(Font.font("Courier New"));
         rawResultField.setEditable(false);
         final ScrollPane resultContainer = new ScrollPane(rawResultField);
         resultContainer.setFitToHeight(true);

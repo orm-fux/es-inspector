@@ -36,7 +36,6 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import lombok.Getter;
 
@@ -56,7 +55,7 @@ public class IndexQueryView extends SplitPane {
     
     final TextField guidedSizeField = new TextField("10");
     
-    private final TextArea rawResultField = new TextArea();
+    private final TextArea rawResultField = new SourceCodeTextArea();
     
     private final TreeView<String> treeResultField = new JsonTreeView(); 
     
@@ -261,7 +260,6 @@ public class IndexQueryView extends SplitPane {
         view.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
         
         final Tab rawResultTab = new Tab("Raw");
-        rawResultField.setFont(Font.font("Courier New"));
         rawResultField.setEditable(false);
         final ScrollPane rawScroll = new ScrollPane(rawResultField);
         rawScroll.setFitToHeight(true);

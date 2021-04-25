@@ -1,5 +1,7 @@
 package com.github.ormfux.esi.ui.indices;
 
+import com.github.ormfux.esi.ui.component.SourceCodeTextArea;
+
 import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -14,7 +16,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
-import javafx.scene.text.Font;
 import lombok.Data;
 
 public class CreateIndexDialog extends Dialog<CreateIndexDialog.CreateData> {
@@ -23,7 +24,7 @@ public class CreateIndexDialog extends Dialog<CreateIndexDialog.CreateData> {
     
     private TextField nameField = new TextField();
     
-    private final TextArea propertiesField = new TextArea();
+    private final TextArea propertiesField = new SourceCodeTextArea();
     
     public CreateIndexDialog() {
         this.index = new CreateData();
@@ -66,7 +67,6 @@ public class CreateIndexDialog extends Dialog<CreateIndexDialog.CreateData> {
         propertiesLabel.setPrefWidth(Region.USE_COMPUTED_SIZE);
 
         propertiesField.setMaxWidth(Double.MAX_VALUE);
-        propertiesField.setFont(Font.font("Courier New"));
         GridPane.setHgrow(propertiesField, Priority.ALWAYS);
         GridPane.setVgrow(propertiesField, Priority.ALWAYS);
         GridPane.setFillWidth(propertiesField, true);

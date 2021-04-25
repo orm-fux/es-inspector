@@ -122,6 +122,6 @@ public class ESInspectorApplication extends Application {
         scene.getStylesheets().add(ESInspectorApplication.class.getResource("ui/es-inspector.css").toExternalForm());
         primaryStage.setScene(scene);
         primaryStage.show();
-
+        
     }
 }

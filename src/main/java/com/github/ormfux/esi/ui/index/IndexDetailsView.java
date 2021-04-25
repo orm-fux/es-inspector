@@ -11,6 +11,7 @@ import java.util.function.Supplier;
 import com.github.ormfux.esi.controller.IndexDetailsController;
 import com.github.ormfux.esi.model.index.ESIndexSettings;
 import com.github.ormfux.esi.model.index.mapping.ESIndexMappingProperty;
+import com.github.ormfux.esi.ui.component.SourceCodeTextArea;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -31,7 +32,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
-import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
 public class IndexDetailsView extends ScrollPane {
@@ -49,7 +49,7 @@ public class IndexDetailsView extends ScrollPane {
     private final TextField creationDateText;
     
     private final TextField versionText;
-    private final TextArea rawSettingsText = new TextArea();
+    private final TextArea rawSettingsText = new SourceCodeTextArea();
     
     private final TableView<ESIndexMappingProperty> mappingPropertiesTable;
     
@@ -115,7 +115,6 @@ public class IndexDetailsView extends ScrollPane {
         replicasText = createTextField();
         detailsContainer.addRow(11, replicasLabel, replicasText);
         
-        rawSettingsText.setFont(Font.font("Courier New"));
         rawSettingsText.setEditable(false);
         rawSettingsText.setPrefColumnCount(100);
         rawSettingsText.setPrefRowCount(40);

@@ -26,12 +26,11 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
 public class GodModeTab extends Tab implements ESConnectedView {
     
-    private final TextArea resultField = new TextArea();
+    private final TextArea resultField = new SourceCodeTextArea();
     
     private final Text responseCodeText = new Text(" ");
     
@@ -70,7 +69,6 @@ public class GodModeTab extends Tab implements ESConnectedView {
         
         final HBox resultStatusBar = new HBox(2, new Label("Response Status: "), responseCodeText, responseMessageText);
         
-        resultField.setFont(Font.font("Courier New"));
         resultField.setEditable(false);
         
         final ScrollPane resultContainer = new ScrollPane(resultField);
