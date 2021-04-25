@@ -119,6 +119,7 @@ public class ESInspectorApplication extends Application {
         final LoggingView loggingView = new LoggingView(loggingService);
         
         final Scene scene = new Scene(new MainLayout(connectionsListView, indexTabs, loggingView), 1280, 720);
+        scene.getStylesheets().add(ESInspectorApplication.class.getResource("ui/es-inspector.css").toExternalForm());
         primaryStage.setScene(scene);
         primaryStage.show();
 

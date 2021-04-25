@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import javafx.scene.control.TreeItem;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
 @Data 
 @EqualsAndHashCode(callSuper = true)
@@ -16,6 +17,7 @@ public class JsonNodeTree extends TreeItem<String> {
     
     private final String name;
     
+    @Getter
     private final JsonNode jsonNode;
     
     public JsonNodeTree(final JsonNode jsonNode, final int initialExpandLevel) {

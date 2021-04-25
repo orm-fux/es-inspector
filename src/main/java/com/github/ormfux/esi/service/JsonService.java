@@ -6,6 +6,7 @@ import java.io.IOException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.github.ormfux.esi.exception.ApplicationException;
 import com.github.ormfux.esi.ui.component.JsonNodeTree;
 import com.github.ormfux.simple.di.annotations.Bean;
@@ -16,10 +17,13 @@ public class JsonService {
     
     private final ObjectMapper jsonMapper;
     
+    private final ObjectWriter prettyWriter;
+    
     @BeanConstructor
     public JsonService() {
         jsonMapper = new ObjectMapper();
         jsonMapper.activateDefaultTyping(jsonMapper.getPolymorphicTypeValidator());
+        prettyWriter = jsonMapper.writerWithDefaultPrettyPrinter();
     }
     
     public JsonNodeTree createJsonFXTree(final String json, final int initialExpandedLevels) {
@@ -39,7 +43,7 @@ public class JsonService {
             final JsonNode sourceNode = responseTree.findValue(nodeName);
             
             if (sourceNode != null) {
-                return jsonMapper.writerWithDefaultPrettyPrinter().writeValueAsString(sourceNode);
+                return prettyWriter.writeValueAsString(sourceNode);
             } else {
                 return null;
             }
@@ -76,6 +80,14 @@ public class JsonService {
     public String writeValueAsString(final Object value) {
         try {
             return jsonMapper.writeValueAsString(value);
+        } catch (JsonProcessingException e) {
+            throw new ApplicationException("Error serializing JSON data.", e);
+        }
+    }
+    
+    public String writeValueAsPrettyString(final Object value) {
+        try {
+            return prettyWriter.writeValueAsString(value);
         } catch (JsonProcessingException e) {
             throw new ApplicationException("Error serializing JSON data.", e);
         }

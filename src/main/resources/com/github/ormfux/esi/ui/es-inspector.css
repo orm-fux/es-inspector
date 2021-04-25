@@ -1,0 +1,13 @@
+.tree-cell:filled:selected:focused, .tree-cell:filled:selected {
+    -fx-background-color: linear-gradient(#328BDB 0%, #207BCF 25%, #1973C9 75%, #0A65BF 100%);
+    -fx-text-fill: white;
+}
+
+.tree-cell:even {
+    -fx-background-color: #f9f9f9;
+}
+
+.tree-cell:filled:hover {
+    -fx-background-color: #0093ff;
+    -fx-text-fill: white;
+}
