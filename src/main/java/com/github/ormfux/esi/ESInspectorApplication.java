@@ -2,6 +2,9 @@ package com.github.ormfux.esi;
 
 import static com.github.ormfux.simple.di.InjectionContext.getBean;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.github.ormfux.esi.controller.AliasDetailsController;
 import com.github.ormfux.esi.controller.GodModeController;
 import com.github.ormfux.esi.controller.IndexDetailsController;
@@ -11,6 +14,7 @@ import com.github.ormfux.esi.controller.ManageIndicesController;
 import com.github.ormfux.esi.service.ESConnectionUsageStatusService;
 import com.github.ormfux.esi.service.LoggingService;
 import com.github.ormfux.esi.ui.ConnectionSelectionView;
+import com.github.ormfux.esi.ui.ESConnectedView;
 import com.github.ormfux.esi.ui.LoggingView;
 import com.github.ormfux.esi.ui.MainLayout;
 import com.github.ormfux.esi.ui.alias.AliasDetailsTab;
@@ -22,6 +26,7 @@ import com.github.ormfux.esi.ui.index.IndexDetailsTabPane;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.control.Tab;
 import javafx.stage.Stage;
 
 public class ESInspectorApplication extends Application {
@@ -46,6 +51,31 @@ public class ESInspectorApplication extends Application {
         final ManageAliasesController manageAliasesController = getBean(ManageAliasesController.class);
         
         final IndexDetailsTabPane indexTabs = new IndexDetailsTabPane();
+        
+        manageConnectionsController.addCloseConnectionHandler(connection -> {
+            final List<Tab> tabsToClose = indexTabs.getTabs()
+                                                   .stream()
+                                                   .filter(tab -> tab instanceof ESConnectedView)
+                                                   .filter(tab -> ((ESConnectedView) tab).getConnection().getId().equals(connection.getId()))
+                                                   .collect(Collectors.toList());
+            
+            tabsToClose.forEach(tab -> {
+                         indexTabs.getTabs().remove(tab);
+                         connectionStatusService.connectionClosed(((ESConnectedView) tab).getConnection().getId());
+                     });
+        });
+        
+        manageConnectionsController.addCloseConnectionHandler(connection -> {
+            if (manageIndicesController.getSelectedConnection().get() != null && connection.getId().equals(manageIndicesController.getSelectedConnection().get().getId())) {
+                manageIndicesController.getSelectedConnection().set(null);
+            }
+        });
+        
+        manageConnectionsController.addCloseConnectionHandler(connection -> {
+            if (manageAliasesController.getSelectedConnection().get() != null && connection.getId().equals(manageAliasesController.getSelectedConnection().get().getId())) {
+                manageAliasesController.getSelectedConnection().set(null);
+            }
+        });
         
         final ConnectionSelectionView connectionsListView = new ConnectionSelectionView(manageConnectionsController, manageIndicesController, manageAliasesController);
         manageConnectionsController.setGodModeViewOpener(connection -> {

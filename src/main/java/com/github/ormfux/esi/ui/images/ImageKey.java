@@ -13,6 +13,8 @@ public enum ImageKey {
 
     CONNECT("connect.png"),
     
+    CLOSE("close.png"),
+    
     GOD_MODE("god_mode.png"),
     
     LIGHTNING("lightning.png"),

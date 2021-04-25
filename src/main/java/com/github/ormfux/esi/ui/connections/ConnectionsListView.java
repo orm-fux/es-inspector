@@ -16,6 +16,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MultipleSelectionModel;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseButton;
@@ -88,6 +89,16 @@ public class ConnectionsListView extends VBox {
             connectionsController.openGodModeView(selectedConnection);
         });
         
+        final Button closeButton = new ImageButton(ImageKey.CLOSE);
+        closeButton.setDisable(true);
+        closeButton.setOnAction(e -> {
+            final MultipleSelectionModel<ESConnection> selectionModel = viewContent.getSelectionModel();
+            final ESConnection selectedConnection = selectionModel.getSelectedItem();
+            connectionsController.closeConnection(selectedConnection);
+            selectionModel.clearSelection();
+            selectionModel.select(selectedConnection);
+        });
+        
         viewContent.setOnMouseClicked(e -> {
             if (e.getButton().equals(MouseButton.PRIMARY) && e.getClickCount() == 2) {
                 final ESConnection selectedConnection = viewContent.getSelectionModel().getSelectedItem();
@@ -109,6 +120,7 @@ public class ConnectionsListView extends VBox {
             
             if (newConn != null) {
                 openButton.setDisable(false);
+                closeButton.setDisable(false);
                 tgmButton.setDisable(false);
                 
                 if (connectionsController.isUsed(newConn)) {
@@ -121,12 +133,13 @@ public class ConnectionsListView extends VBox {
             } else {
                 tgmButton.setDisable(true);
                 openButton.setDisable(true);
+                closeButton.setDisable(true);
                 deleteButton.setDisable(true);
                 editButton.setDisable(true);
             }
         });
         
-        actionsContainer.getChildren().addAll(openButton, tgmButton, createButton, editButton, deleteButton);
+        actionsContainer.getChildren().addAll(openButton, closeButton, tgmButton, createButton, editButton, deleteButton);
         viewHeader.setRight(actionsContainer);
 
         final BorderPane viewFooter = new BorderPane();

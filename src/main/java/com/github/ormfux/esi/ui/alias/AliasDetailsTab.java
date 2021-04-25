@@ -1,6 +1,10 @@
 package com.github.ormfux.esi.ui.alias;
 
+import java.util.function.Supplier;
+
 import com.github.ormfux.esi.controller.AliasDetailsController;
+import com.github.ormfux.esi.model.settings.connection.ESConnection;
+import com.github.ormfux.esi.ui.ESConnectedView;
 import com.github.ormfux.esi.ui.images.ImageKey;
 import com.github.ormfux.esi.ui.images.ImageRegistry;
 
@@ -10,7 +14,9 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.image.ImageView;
 
-public class AliasDetailsTab extends Tab {
+public class AliasDetailsTab extends Tab implements ESConnectedView {
+    
+    private final Supplier<ESConnection> connectionSupplier;
     
     public AliasDetailsTab(final AliasDetailsController aliasController) {
         setClosable(true);
@@ -51,6 +57,13 @@ public class AliasDetailsTab extends Tab {
         details.getSelectionModel().select(detailsTab);
         
         setContent(details);
+        
+        connectionSupplier = () -> aliasController.getAlias().getConnection();
+    }
+    
+    @Override
+    public ESConnection getConnection() {
+        return connectionSupplier.get();
     }
     
 }

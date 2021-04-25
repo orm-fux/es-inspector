@@ -34,6 +34,8 @@ public class ManageConnectionsController {
     @Setter
     private Consumer<ESConnection> godModeViewOpener;
     
+    private final List<Consumer<ESConnection>> closeConnectionHandlers = new ArrayList<>();
+    
     @BeanConstructor
     public ManageConnectionsController(final JsonService jsonService, 
                                        final ESRestClient restClient, 
@@ -80,6 +82,14 @@ public class ManageConnectionsController {
     
     public void openGodModeView(final ESConnection connection) {
         godModeViewOpener.accept(connection);
+    }
+    
+    public void closeConnection(final ESConnection connection) {
+        closeConnectionHandlers.stream().forEach(handler -> handler.accept(connection));
+    }
+    
+    public void addCloseConnectionHandler(final Consumer<ESConnection> handler) {
+        closeConnectionHandlers.add(handler);
     }
     
     private void loadConnections() {

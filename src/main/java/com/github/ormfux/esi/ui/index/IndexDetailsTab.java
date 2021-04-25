@@ -1,6 +1,10 @@
 package com.github.ormfux.esi.ui.index;
 
+import java.util.function.Supplier;
+
 import com.github.ormfux.esi.controller.IndexDetailsController;
+import com.github.ormfux.esi.model.settings.connection.ESConnection;
+import com.github.ormfux.esi.ui.ESConnectedView;
 import com.github.ormfux.esi.ui.images.ImageKey;
 import com.github.ormfux.esi.ui.images.ImageRegistry;
 
@@ -10,7 +14,9 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.image.ImageView;
 
-public class IndexDetailsTab extends Tab {
+public class IndexDetailsTab extends Tab implements ESConnectedView {
+    
+    private final Supplier<ESConnection> connectionSupplier;
     
     public IndexDetailsTab(final IndexDetailsController indexController) {
         setClosable(true);
@@ -51,6 +57,13 @@ public class IndexDetailsTab extends Tab {
         details.getSelectionModel().select(detailsTab);
         
         setContent(details);
+        
+        connectionSupplier = () -> indexController.getIndex().getConnection();
+    }
+    
+    @Override
+    public ESConnection getConnection() {
+        return connectionSupplier.get();
     }
     
 }

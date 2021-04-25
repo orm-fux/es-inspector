@@ -1,7 +1,11 @@
 package com.github.ormfux.esi.ui.connections;
 
+import java.util.function.Supplier;
+
 import com.github.ormfux.esi.controller.GodModeController;
 import com.github.ormfux.esi.model.ESResponse;
+import com.github.ormfux.esi.model.settings.connection.ESConnection;
+import com.github.ormfux.esi.ui.ESConnectedView;
 import com.github.ormfux.esi.ui.component.SourceCodeTextArea;
 import com.github.ormfux.esi.ui.images.ImageKey;
 import com.github.ormfux.esi.ui.images.ImageRegistry;
@@ -25,13 +29,15 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
-public class GodModeTab extends Tab {
+public class GodModeTab extends Tab implements ESConnectedView {
     
     private final TextArea resultField = new TextArea();
     
     private final Text responseCodeText = new Text(" ");
     
     private final Text responseMessageText = new Text(" ");
+    
+    private final Supplier<ESConnection> connectionSupplier;
     
     public GodModeTab(final GodModeController godModeController) {
         setClosable(true);
@@ -54,6 +60,8 @@ public class GodModeTab extends Tab {
         content.getItems().addAll(new StackPane(querySubView), new StackPane(resultSubView));
         
         setContent(content);
+        
+        connectionSupplier = () -> godModeController.getConnection();
     }
 
     private VBox createResultSubView() {
@@ -111,5 +119,10 @@ public class GodModeTab extends Tab {
         querySubView.getChildren().addAll(actionsBar, queryContainer);
         
         return querySubView;
+    }
+    
+    @Override
+    public ESConnection getConnection() {
+        return connectionSupplier.get();
     }
 }

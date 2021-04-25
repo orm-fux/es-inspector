@@ -10,7 +10,6 @@ import com.github.ormfux.esi.service.ManageIndexService;
 import com.github.ormfux.simple.di.annotations.Bean;
 import com.github.ormfux.simple.di.annotations.BeanConstructor;
 
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -74,7 +73,7 @@ public class ManageIndicesController {
         return indexes;
     }
     
-    public ObjectProperty<ESConnection> getSelectedConnection() {
+    public SimpleObjectProperty<ESConnection> getSelectedConnection() {
         return selectedConnection;
     }
     
