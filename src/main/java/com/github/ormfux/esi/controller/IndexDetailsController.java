@@ -2,7 +2,6 @@ package com.github.ormfux.esi.controller;
 
 import java.util.List;
 
-import com.github.ormfux.esi.exception.ApplicationException;
 import com.github.ormfux.esi.model.ESResponse;
 import com.github.ormfux.esi.model.ESSearchResult;
 import com.github.ormfux.esi.model.index.ESIndex;
@@ -71,7 +70,7 @@ public class IndexDetailsController {
     
     public String saveDocument(final String documentId, final String document, final boolean update) {
         if (!update && doSearchDocument(documentId).isOk()) {
-            throw new ApplicationException("A document with id '" + documentId + "' already exists", null);
+            return "A document with id '" + documentId + "' already exists";
         } else {
             return returnResponseContent(restClient.sendPutRequest(index.getConnection(), index.getName() + "/_doc/" + documentId + "?pretty", document));
         }

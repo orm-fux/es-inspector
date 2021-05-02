@@ -1,6 +1,5 @@
 package com.github.ormfux.esi.controller;
 
-import com.github.ormfux.esi.exception.ApplicationException;
 import com.github.ormfux.esi.model.ESResponse;
 import com.github.ormfux.esi.model.ESSearchResult;
 import com.github.ormfux.esi.model.alias.ESMultiIndexAlias;
@@ -74,7 +73,7 @@ public class AliasDetailsController {
     
     public String saveDocument(final String documentId, final String document, final boolean update) {
         if (!update && doSearchDocument(documentId).isOk()) {
-            throw new ApplicationException("A document with id '" + documentId + "' already exists", null);
+            return "A document with id '" + documentId + "' already exists";
         } else {
             return returnResponseContent(restClient.sendPutRequest(alias.getConnection(), alias.getName() + "/_doc/" + documentId + "?pretty", document));
         }
