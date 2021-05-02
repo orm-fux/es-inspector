@@ -101,7 +101,7 @@ In the tree view you can copy a sub-tree by selecting it and using the keyboard 
 
 ![Tree Result](images/result-view_tree.png)
 
-The table view allows you to re-order the columns via drag-&-drop of the column headers, as well as sorting by column on the column headers.
+The table view allows you to re-order the columns via drag-&-drop of the column headers, as well as sorting by column by clicking on the column headers.
 
 ![Table Result](images/result-view_table.png)
 
