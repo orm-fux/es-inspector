@@ -15,6 +15,10 @@ import com.github.ormfux.simple.di.annotations.BeanConstructor;
 @Bean
 public class QueryResultTransformService {
     
+    private static final String SOURCE_FIELD = "_source";
+    private static final String SCORE_FIELD = "_score";
+    private static final String ID_FIELD = "_id";
+    
     private final JsonService jsonService;
     
     @BeanConstructor
@@ -33,8 +37,8 @@ public class QueryResultTransformService {
         if (tree instanceof ArrayNode) {
             final ArrayNode rows = (ArrayNode) tree;
             final JsonDataTable table = new JsonDataTable();
-            table.addColumn("_id");
-            table.addColumn("_score");
+            table.addColumn(ID_FIELD);
+            table.addColumn(SCORE_FIELD);
             
             for (int rowIndex = 0; rowIndex < rows.size(); rowIndex++) {
                 final JsonNode row = rows.get(rowIndex);
@@ -50,19 +54,19 @@ public class QueryResultTransformService {
     private void addRow(final JsonDataTable table, final JsonNode rowData) {
         final JsonDataRow row = new JsonDataRow(rowData);
         
-        final JsonNode idNode = rowData.get("_id");
+        final JsonNode idNode = rowData.get(ID_FIELD);
         
         if (idNode.isValueNode()) {
-            row.addColumnValue("_id", idNode.asText());
+            row.addColumnValue(ID_FIELD, idNode.asText());
         }
         
-        final JsonNode scoreNode = rowData.get("_score");
+        final JsonNode scoreNode = rowData.get(SCORE_FIELD);
         
         if (scoreNode.isValueNode()) {
-            row.addColumnValue("_score", scoreNode.asText());
+            row.addColumnValue(SCORE_FIELD, scoreNode.asText());
         }
         
-        final JsonNode rowValues = rowData.get("_source");
+        final JsonNode rowValues = rowData.get(SOURCE_FIELD);
         
         if (rowValues != null) {
             addRowValues(table, row, rowValues, null);

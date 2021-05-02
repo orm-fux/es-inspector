@@ -25,7 +25,9 @@ public enum ImageKey {
     
     ALIAS("alias.png"),
     
-    APPLICATION("esg-icon.png");
+    APPLICATION("esg-icon.png"),
+    
+    SAVE("save.png");
 
     @Getter(AccessLevel.PROTECTED)
     private final String fileName;

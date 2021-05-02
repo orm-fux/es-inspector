@@ -1,5 +1,8 @@
 package com.github.ormfux.esi.ui.component;
 
+import java.util.List;
+import java.util.StringJoiner;
+
 import com.github.ormfux.esi.model.table.JsonDataRow;
 import com.github.ormfux.esi.model.table.JsonDataTable;
 
@@ -9,7 +12,10 @@ import javafx.scene.control.TableView;
 
 public class JsonTableView extends TableView<JsonDataRow> {
 
+    private JsonDataTable tableData;
+    
     public void setTableContent(final JsonDataTable tableData) {
+        this.tableData = tableData;
         getItems().clear();
         getColumns().clear();
         
@@ -24,4 +30,46 @@ public class JsonTableView extends TableView<JsonDataRow> {
         }
     }
     
+    public String toCsv() {
+        if (tableData != null) {
+            final StringJoiner csvJoiner = new StringJoiner("\n");
+            
+            final List<String> columns = tableData.getOrderedColumns();
+            final StringJoiner headerRow = new StringJoiner(",");
+            columns.forEach(column -> headerRow.add(escapeSpecialCharacters(column)));
+            csvJoiner.add(headerRow.toString());
+            
+            for (final JsonDataRow row : tableData.getRows()) {
+                final StringJoiner csvRow = new StringJoiner(",");
+                
+                columns.forEach(column -> {
+                    final String columnValue = row.getColumnValue(column);
+                    
+                    if (columnValue != null) {
+                        csvRow.add(escapeSpecialCharacters(columnValue));
+                    } else {
+                        csvRow.add("");
+                    }
+                });
+                
+                csvJoiner.add(csvRow.toString());
+            }
+            
+            return csvJoiner.toString();
+        } else {
+            return "";
+        }
+    }
+    
+    
+    private String escapeSpecialCharacters(final String data) {
+        String escapedData = data.replaceAll("\\R", " ");
+        
+        if (data.contains(",") || data.contains("\"") || data.contains("'")) {
+            escapedData = escapedData.replace("\"", "\"\"");
+            escapedData = "\"" + escapedData + "\"";
+        }
+        
+        return escapedData;
+    }
 }

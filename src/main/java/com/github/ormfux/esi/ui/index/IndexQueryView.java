@@ -2,16 +2,22 @@ package com.github.ormfux.esi.ui.index;
 
 import static javafx.collections.FXCollections.observableArrayList;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
 import com.github.ormfux.esi.controller.IndexDetailsController;
+import com.github.ormfux.esi.exception.ApplicationException;
 import com.github.ormfux.esi.model.ESSearchResult;
 import com.github.ormfux.esi.ui.component.AsyncButton;
 import com.github.ormfux.esi.ui.component.JsonTableView;
 import com.github.ormfux.esi.ui.component.JsonTreeView;
 import com.github.ormfux.esi.ui.component.SourceCodeTextArea;
+import com.github.ormfux.esi.ui.images.ImageButton;
+import com.github.ormfux.esi.ui.images.ImageKey;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -33,12 +39,15 @@ import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
 import lombok.Getter;
 
 public class IndexQueryView extends SplitPane {
@@ -68,7 +77,7 @@ public class IndexQueryView extends SplitPane {
         
         final BorderPane querySubView = createQuerySubView(indexController);
         
-        final TabPane resultSubView = createResultSubView();
+        final AnchorPane resultSubView = createResultSubView();
         
         setOrientation(Orientation.VERTICAL);
         setDividerPositions(0.5);
@@ -259,10 +268,9 @@ public class IndexQueryView extends SplitPane {
         guidedQuerySubView.getChildren().add(scroll);
     }
     
-    
-    private TabPane createResultSubView() {
-        final TabPane view = new TabPane();
-        view.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
+    private AnchorPane createResultSubView() {
+        final TabPane tabView = new TabPane();
+        tabView.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
         
         final Tab treeResultTab = new Tab("Tree");
 
@@ -271,8 +279,8 @@ public class IndexQueryView extends SplitPane {
         treeScroll.setFitToWidth(true);
         treeResultTab.setContent(treeScroll);
         
-        view.getTabs().add(treeResultTab);
-        view.getSelectionModel().select(treeResultTab);
+        tabView.getTabs().add(treeResultTab);
+        tabView.getSelectionModel().select(treeResultTab);
         
         final Tab tableResultTab = new Tab("Table");
 
@@ -281,7 +289,7 @@ public class IndexQueryView extends SplitPane {
         tableScroll.setFitToWidth(true);
         tableResultTab.setContent(tableScroll);
         
-        view.getTabs().add(tableResultTab);
+        tabView.getTabs().add(tableResultTab);
         
         final Tab rawResultTab = new Tab("Raw");
         rawResultField.setEditable(false);
@@ -290,9 +298,48 @@ public class IndexQueryView extends SplitPane {
         rawScroll.setFitToWidth(true);
         rawResultTab.setContent(rawScroll);
         
-        view.getTabs().add(rawResultTab);
+        tabView.getTabs().add(rawResultTab);
         
-        return view;
+        final HBox actionBar = new HBox();
+        
+        final ImageButton saveButton = new ImageButton(ImageKey.SAVE);
+        saveButton.disableProperty().bind(rawResultField.textProperty().isEmpty());
+        final FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save");
+        
+        fileChooser.getExtensionFilters().addAll(new ExtensionFilter("JSON files (*.json)", "*.json", "*.JSON"), new ExtensionFilter("CSV files (*.csv)", "*.csv", "*.CSV"));
+        
+        saveButton.setOnAction(e -> {
+            final File targetFile = fileChooser.showSaveDialog(getScene().getWindow());
+            
+            if (targetFile != null) {
+                final String fileName = targetFile.getName();
+                
+                try {
+                    if (fileName.endsWith(".csv") || fileName.endsWith(".CSV")) {
+                        Files.writeString(targetFile.toPath(), tableResultField.toCsv());
+                    } else {
+                        Files.writeString(targetFile.toPath(), rawResultField.getText());
+                    }
+                } catch (final IOException ex) {
+                    throw new ApplicationException("Error saving to file " + targetFile, ex);
+                }
+            }
+            
+        });
+        
+        actionBar.getChildren().addAll(saveButton);
+
+        final AnchorPane resultView = new AnchorPane();
+        resultView.getChildren().addAll(tabView, actionBar);
+        AnchorPane.setTopAnchor(actionBar, 3.0);
+        AnchorPane.setRightAnchor(actionBar, 5.0);
+        AnchorPane.setTopAnchor(tabView, 1.0);
+        AnchorPane.setRightAnchor(tabView, 1.0);
+        AnchorPane.setLeftAnchor(tabView, 1.0);
+        AnchorPane.setBottomAnchor(tabView, 1.0);
+        
+        return resultView;
     }
     
     private String buildGuidedQuery() {
