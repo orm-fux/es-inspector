@@ -107,6 +107,6 @@ The table view allows you to re-order the columns via drag-&-drop of the column 
 
 ### Expert View
 
-If you know what you are doing you can open a "God Mode" view for each connection. It will show you a simple view that allows to call any REST API endpoint for that connection. You are free to define whatever call you want. *Be careful: Requests executed in this view do NOT synchronize with the other views showing information for this connection!*
+If you know what you are doing you can open a "God Mode" view for each connection. You do so by using the little button with lightning bolt icon at the top of the connections list. It will show you a simple view that allows to call any REST API endpoint for that connection. You are free to define whatever call you want. *Be careful: Requests executed in this view do NOT synchronize with the other views showing information for this connection!*
 
 ![God Mode View](images/god-mode-view.png)
