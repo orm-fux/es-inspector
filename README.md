@@ -15,8 +15,6 @@ A client GUI for Elasticsearch. The client is implemented with JavaFx, is callin
   * [Details View](#details-view)
   * [Document View](#document-view)
   * [Query View](#query-view)
-    * [Defining the Query](#defining-the-query)
-    * [Search Results](#search-results)
 * [Expert View](#expert-view)
 
 ## Running and Installation
@@ -35,7 +33,7 @@ Download the desired package from the project's GitHub [releases](https://github
 
 ## Features
 
-## Connections, Indices, and Aliases
+### Connections, Indices, and Aliases
 
 The inspector allows to save multiple connections to Elasticsearch. For each connection you need to specify a name, URL to the Elasticsearch host, and the credentials to use. Optionally you can define default filters that are applied to the listings of the aliases and indices of the connection. 
 
@@ -49,13 +47,13 @@ The index and alias listing views have a small action bar that allow you to "ope
 
 And as a side note: Each delete operation in the inspector will open a confirmation prompt to avoid accidental deletions.
 
-## Working with an Index or Alias
+### Working with an Index or Alias
 
 To work with an index or alias select it in the listings on the left hand side of the inspector and double click it or use the corresponding "open" button. You can "open" an index/alias multiple times. 
 
 When opening them a new tab is displayed in the main area of the inspector. The tab has three sub-tabs: "Details", "Document", and "Query". Initially it shows the "Details" sub-tab.
 
-### Details View
+#### Details View
 
 No matter if index or alias the details view shows the host URL, Elasticsearch version, and name.
 
@@ -67,17 +65,17 @@ For an aliases viewer additional details are displayed. They are the indices for
 
 ![Alias Details](images/alias_details.png)
 
-### Document View
+#### Document View
 
 To work with single documents you can use the document view. The view works on document ID basis and allows you to look up documents by their ID, delete a document, create a new one, or "change" (create or update) new documents. For the "change" operation the inspector will automatically look up the document and fill in the input field when you are entering the document ID.
 
 ![Document View](images/document-view.png)
 
-### Query View
+#### Query View
 
 This is the "search" view in the inspector. It has two main sub areas: one for the search query and another one for the search result.
 
-#### Defining the Query
+##### Defining the Query
 
 To enter queries you have the option to enter it like plain Elasticsearch JSON query or in an assisted manner. Select the option from the drop down in the top left corner of the view. 
 
@@ -91,7 +89,7 @@ When using assisted queries (named "Guided Boolean" in the inspector) you are pr
 
 ![Assisted Query](images/query-view_guided.png)
 
-#### Search Results
+##### Search Results
 
 The search results are displayed at the bottom of the query view. They are shown in three different styles: raw JSON, an expandable tree view, and a table view.
 
@@ -107,7 +105,7 @@ The table view allows you to re-order the columns via drag-&_drop of the column 
 
 ![Table Result](images/result-view_table.png)
 
-## Expert View
+### Expert View
 
 If you know what you are doing you can open a "God Mode" view for each connection. It will show you a simple view that allows to call any REST API endpoint for that connection. You are free to define whatever call you want. *Be careful: Requests executed in this view do NOT synchronize with the other views showing information for this connection!*
 
