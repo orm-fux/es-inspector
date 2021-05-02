@@ -1,0 +1,99 @@
+# Elasticsearch Inspector
+
+A client GUI for Elasticsearch. The client is implemented with JavaFx, is calling the REST API of Elasticsearch, and displaying the results in its GUI.
+
+## Main Features
+
+![Main UI](/images/main-ui.png)
+
+## Running and Installation
+
+The Elasticsearch Inspector requires Java 11. You can download it from https://adoptopenjdk.net/
+
+To run the inspector execute the start script found in the "bin" directory in the inspector's installation directory.
+
+### From Source
+
+To build the application from source you need [Gradle](https://gradle.org/). Clone the repository and switch to the desired tag. Then issue a simple `gradle clean build`. You will find the assembled distributions in the "build/distributions" folder. There will be one for Windows, one for Linux, and one for MacOS.
+
+### Pre-Build Releases
+
+Download the desired package from the project's GitHub [releases](https://github.com/orm-fux/es-inspector/releases) page. Each release has a pre-build archive for the major platforms: Windows, Linux, and MacOS. Simply extract the archive to a convenient location and you're good to go. It is recommended that you donwload the [latest release](https://github.com/orm-fux/es-inspector/releases/latest).
+
+## Features
+
+## Connections, Indices, and Aliases
+
+The inspector allows to save multiple connections to Elasticsearch. For each connection you need to specify a name, URL to the Elasticsearch host, and the credentials to use. Optionally you can define default filters that are applied to the listings of the aliases and indices of the connection. 
+
+![Create/Edit connection](images/connection_create-or-edit.jpg)
+
+To open a connection click the "Open" button or double click on the connection. When you "open" a connection the inspector looks up all the indices and aliases for it. If you've specified some default filters they are automatically applied to the list - allowing you to focus directly on only those indices and aliases that you need (your host might have a lot of indices/aliases and you always work with only a few of them).
+
+To close everything related to a connection you can use the "close" connection button. This will close all views in the inspector that are in some way related to the connection and clear the index and alias listing views.
+
+The index and alias listing views have a small action bar that allow you to "open" them, create new ones, or delete them. When deleting an alias you are prompted to select for which alias you want to delete the index.
+
+And as a side note: Each delete operation in the inspector will open a confirmation prompt to avoid accidental deletions.
+
+## Working with an Index or Alias
+
+To work with an index or alias select it in the listings on the left hand side of the inspector and double click it or use the corresponding "open" button. You can "open" an index/alias multiple times. 
+
+When opening them a new tab is displayed in the main area of the inspector. The tab has three sub-tabs: "Details", "Document", and "Query". Initially it shows the "Details" sub-tab.
+
+### Details View
+
+No matter if index or alias the details view shows the host URL, Elasticsearch version, and name.
+
+For an index it shows the overall state as well: Status, number of documents, storage size. Further details include the mappings defined for the index as welll as a raw view of the index settings.
+
+![Index Details](images/index_details.png)
+
+For an aliases viewer additional details are displayed. They are the indices for which an the alias is defined and which index is the "write index" for the alias (i.e. the index to which Elasticsearch writes for write operations on the alias).
+
+![Alias Details](images/alias_details.png)
+
+### Document View
+
+To work with single documents you can use the document view. The veiew works on document ID basis and allows you to look up documents by their ID, delete a document, create a new one, or "change" (create or update) new documents. For the "change" operation the inspector will automatically look up the document and fill in the input field when you are entering the document ID.
+
+![Document View](images/document-view.png)
+
+### Query View
+
+This is the "search" view in the inspector. It has two main sub areas: one for the search query and another one for the search result.
+
+#### Defining the Query
+
+To enter queries you have the option to enter it like plain Elasticsearch JSON query or in an assisted manner. Select the option from the dropdown in the top left corner of the view. 
+
+When using plain queries for searching enter the query in the text field. ON the right hand side of the view you have a filterabe listing of all mapped properties in the index (not available for aliases). You can select a mapped property in their and use the "Add to Query" button to add it at the current caret positoin in the query - or simply double click it. 
+
+You can use the keyboard shortcut `Ctrl+F` to open a small search dialog to do some text searches in your query text. This keyboard shortcut is available for every "source code styled" text box in the inspector.
+
+![Plain Query](images/query-view_plain.png)
+
+When using assisted queries (named "Guided Boolean" in the inspector) you are presented with a small UI that allows you to compose a relatively simple `bool` query. Select the properties and their values for `must`, `must_not`, and `should`. You can compose arbitrary many properties.
+
+![Assisted Query](images/query-view_guided.png)
+
+#### Search Results
+
+The search results are displayed at the bottom of the query view. They are shown in three different styles: raw JSON, an expandable tree view, and a table view.
+
+![Raw JSON Result](images/result-view_raw.png)
+
+In the tree view you can copy a sub-tree by selecting it and using the keyboard shortcut `Ctrl+C`. It will be copied as JSON string.
+
+![Tree Result](images/result-view_tree.png)
+
+The table view allows you to re-order the columns via drag-&_drop of the column headers, as well as sorting by column on the column headers.
+
+![Table Result](images/result-view_table.png)
+
+## Expert View
+
+If you know what you are doing you can open a "God Mode" view for each connection. It will show you a simple view that allows to call any REST API endpoint for that connection. You are free to define whatever call you want. *Be careful: Requests executed in this view do NOT synchronize with the other views showing information for this connection!*
+
+![God Mode View](images/god-mode-view.png)
