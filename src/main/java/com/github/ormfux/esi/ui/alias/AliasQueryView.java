@@ -41,7 +41,7 @@ public class AliasQueryView extends SplitPane {
     
     private final JsonTreeView treeResultField = new JsonTreeView();
     
-    private final JsonTableView tableResultField = new JsonTableView();
+    private final JsonTableView tableResultField = new JsonTableView(15);
     
     public AliasQueryView(final AliasDetailsController aliasController) {
         setPadding(new Insets(5));

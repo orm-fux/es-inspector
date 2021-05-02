@@ -70,7 +70,7 @@ public class IndexQueryView extends SplitPane {
     
     private final JsonTreeView treeResultField = new JsonTreeView(); 
     
-    private final JsonTableView tableResultField = new JsonTableView();
+    private final JsonTableView tableResultField = new JsonTableView(15);
     
     public IndexQueryView(final IndexDetailsController indexController) {
         setPadding(new Insets(5));
