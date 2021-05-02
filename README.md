@@ -18,7 +18,7 @@ To build the application from source you need [Gradle](https://gradle.org/). Clo
 
 ### Pre-Build Releases
 
-Download the desired package from the project's GitHub [releases](https://github.com/orm-fux/es-inspector/releases) page. Each release has a pre-build archive for the major platforms: Windows, Linux, and MacOS. Simply extract the archive to a convenient location and you're good to go. It is recommended that you donwload the [latest release](https://github.com/orm-fux/es-inspector/releases/latest).
+Download the desired package from the project's GitHub [releases](https://github.com/orm-fux/es-inspector/releases) page. Each release has a pre-build archive for the major platforms: Windows, Linux, and MacOS. Simply extract the archive to a convenient location and you're good to go. It is recommended that you download the [latest release](https://github.com/orm-fux/es-inspector/releases/latest).
 
 ## Features
 
@@ -56,7 +56,7 @@ For an aliases viewer additional details are displayed. They are the indices for
 
 ### Document View
 
-To work with single documents you can use the document view. The veiew works on document ID basis and allows you to look up documents by their ID, delete a document, create a new one, or "change" (create or update) new documents. For the "change" operation the inspector will automatically look up the document and fill in the input field when you are entering the document ID.
+To work with single documents you can use the document view. The view works on document ID basis and allows you to look up documents by their ID, delete a document, create a new one, or "change" (create or update) new documents. For the "change" operation the inspector will automatically look up the document and fill in the input field when you are entering the document ID.
 
 ![Document View](images/document-view.png)
 
@@ -66,9 +66,9 @@ This is the "search" view in the inspector. It has two main sub areas: one for t
 
 #### Defining the Query
 
-To enter queries you have the option to enter it like plain Elasticsearch JSON query or in an assisted manner. Select the option from the dropdown in the top left corner of the view. 
+To enter queries you have the option to enter it like plain Elasticsearch JSON query or in an assisted manner. Select the option from the drop down in the top left corner of the view. 
 
-When using plain queries for searching enter the query in the text field. ON the right hand side of the view you have a filterabe listing of all mapped properties in the index (not available for aliases). You can select a mapped property in their and use the "Add to Query" button to add it at the current caret positoin in the query - or simply double click it. 
+When using plain queries for searching enter the query in the text field. ON the right hand side of the view you have a filterable listing of all mapped properties in the index (not available for aliases). You can select a mapped property in their and use the "Add to Query" button to add it at the current caret position in the query - or simply double click it. 
 
 You can use the keyboard shortcut `Ctrl+F` to open a small search dialog to do some text searches in your query text. This keyboard shortcut is available for every "source code styled" text box in the inspector.
 
@@ -81,6 +81,8 @@ When using assisted queries (named "Guided Boolean" in the inspector) you are pr
 #### Search Results
 
 The search results are displayed at the bottom of the query view. They are shown in three different styles: raw JSON, an expandable tree view, and a table view.
+
+You can export the search results with the export button in the top right corner of the results view. You have the option to export them as JSON file or as CSV file. The CSV will export the data sorted as it is in the table view (but all data and not just the currently displayed page).
 
 ![Raw JSON Result](images/result-view_raw.png)
 
