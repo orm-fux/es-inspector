@@ -70,6 +70,7 @@ public class JsonTableView extends Pagination {
             if (pageCount == 0) {
                 setPageCount(1);
             } else {
+                fillPage(0);
                 setPageCount(pageCount);
             }
             
