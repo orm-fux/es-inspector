@@ -67,7 +67,7 @@ public class IndexDocumentView extends SplitPane {
         final AsyncButton deleteButton = new AsyncButton("Delete", runningIcon);
         deleteButton.managedProperty().bind(deleteButton.visibleProperty());
         deleteButton.disableProperty().bind(documentIdField.textProperty().isEmpty().or(runningIcon.visibleProperty()));
-        deleteButton.setAction(() -> {
+        deleteButton.setOnAction(e -> {
             final Alert alert = new Alert(AlertType.NONE, "Really delete the document '" + documentIdField.getText() + "'?", ButtonType.CANCEL, ButtonType.OK);
             
             if (alert.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {

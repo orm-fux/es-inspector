@@ -9,9 +9,11 @@ import java.util.StringJoiner;
 import com.github.ormfux.esi.controller.IndexDetailsController;
 import com.github.ormfux.esi.model.ESSearchResult;
 import com.github.ormfux.esi.ui.component.AsyncButton;
+import com.github.ormfux.esi.ui.component.JsonTableView;
 import com.github.ormfux.esi.ui.component.JsonTreeView;
 import com.github.ormfux.esi.ui.component.SourceCodeTextArea;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -59,6 +61,8 @@ public class IndexQueryView extends SplitPane {
     
     private final JsonTreeView treeResultField = new JsonTreeView(); 
     
+    private final JsonTableView tableResultField = new JsonTableView();
+    
     public IndexQueryView(final IndexDetailsController indexController) {
         setPadding(new Insets(5));
         
@@ -98,6 +102,7 @@ public class IndexQueryView extends SplitPane {
             
             rawResultField.setText(searchResult.getResultString());
             treeResultField.setTree(searchResult.getFxTree());
+            Platform.runLater(() ->  tableResultField.setTableContent(searchResult.getTableData()));
         });
         
         final HBox actionsBar = new HBox(2, queryTypeLabel, queryTypeField, searchButton, runningIcon);
@@ -259,15 +264,6 @@ public class IndexQueryView extends SplitPane {
         final TabPane view = new TabPane();
         view.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
         
-        final Tab rawResultTab = new Tab("Raw");
-        rawResultField.setEditable(false);
-        final ScrollPane rawScroll = new ScrollPane(rawResultField);
-        rawScroll.setFitToHeight(true);
-        rawScroll.setFitToWidth(true);
-        rawResultTab.setContent(rawScroll);
-        
-        view.getTabs().add(rawResultTab);
-        
         final Tab treeResultTab = new Tab("Tree");
 
         final ScrollPane treeScroll = new ScrollPane(treeResultField);
@@ -277,6 +273,24 @@ public class IndexQueryView extends SplitPane {
         
         view.getTabs().add(treeResultTab);
         view.getSelectionModel().select(treeResultTab);
+        
+        final Tab tableResultTab = new Tab("Table");
+
+        final ScrollPane tableScroll = new ScrollPane(tableResultField);
+        tableScroll.setFitToHeight(true);
+        tableScroll.setFitToWidth(true);
+        tableResultTab.setContent(tableScroll);
+        
+        view.getTabs().add(tableResultTab);
+        
+        final Tab rawResultTab = new Tab("Raw");
+        rawResultField.setEditable(false);
+        final ScrollPane rawScroll = new ScrollPane(rawResultField);
+        rawScroll.setFitToHeight(true);
+        rawScroll.setFitToWidth(true);
+        rawResultTab.setContent(rawScroll);
+        
+        view.getTabs().add(rawResultTab);
         
         return view;
     }

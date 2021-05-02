@@ -123,5 +123,6 @@ public class ESInspectorApplication extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
         
+        primaryStage.setOnCloseRequest(e -> System.exit(1));
     }
 }

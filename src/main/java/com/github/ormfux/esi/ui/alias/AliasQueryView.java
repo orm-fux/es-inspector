@@ -3,9 +3,11 @@ package com.github.ormfux.esi.ui.alias;
 import com.github.ormfux.esi.controller.AliasDetailsController;
 import com.github.ormfux.esi.model.ESSearchResult;
 import com.github.ormfux.esi.ui.component.AsyncButton;
+import com.github.ormfux.esi.ui.component.JsonTableView;
 import com.github.ormfux.esi.ui.component.JsonTreeView;
 import com.github.ormfux.esi.ui.component.SourceCodeTextArea;
 
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
@@ -27,7 +29,9 @@ public class AliasQueryView extends SplitPane {
     
     private final TextArea rawResultField = new SourceCodeTextArea();
     
-    private final JsonTreeView treeResultField = new JsonTreeView(); 
+    private final JsonTreeView treeResultField = new JsonTreeView();
+    
+    private final JsonTableView tableResultField = new JsonTableView();
     
     public AliasQueryView(final AliasDetailsController aliasController) {
         setPadding(new Insets(5));
@@ -56,6 +60,7 @@ public class AliasQueryView extends SplitPane {
             final ESSearchResult searchResult = aliasController.search(queryField.getText());
             rawResultField.setText(searchResult.getResultString());
             treeResultField.setTree(searchResult.getFxTree());
+            Platform.runLater(() ->  tableResultField.setTableContent(searchResult.getTableData()));
         });
         final HBox actionsBar = new HBox(2, queryLabel, searchButton, runningIcon);
         actionsBar.setAlignment(Pos.CENTER_LEFT);
@@ -76,15 +81,6 @@ public class AliasQueryView extends SplitPane {
         final TabPane view = new TabPane();
         view.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
         
-        final Tab rawResultTab = new Tab("Raw");
-        rawResultField.setEditable(false);
-        final ScrollPane rawScroll = new ScrollPane(rawResultField);
-        rawScroll.setFitToHeight(true);
-        rawScroll.setFitToWidth(true);
-        rawResultTab.setContent(rawScroll);
-        
-        view.getTabs().add(rawResultTab);
-        
         final Tab treeResultTab = new Tab("Tree");
 
         final ScrollPane treeScroll = new ScrollPane(treeResultField);
@@ -94,6 +90,24 @@ public class AliasQueryView extends SplitPane {
         
         view.getTabs().add(treeResultTab);
         view.getSelectionModel().select(treeResultTab);
+        
+        final Tab tableResultTab = new Tab("Table");
+
+        final ScrollPane tableScroll = new ScrollPane(tableResultField);
+        tableScroll.setFitToHeight(true);
+        tableScroll.setFitToWidth(true);
+        tableResultTab.setContent(tableScroll);
+        
+        view.getTabs().add(tableResultTab);
+        
+        final Tab rawResultTab = new Tab("Raw");
+        rawResultField.setEditable(false);
+        final ScrollPane rawScroll = new ScrollPane(rawResultField);
+        rawScroll.setFitToHeight(true);
+        rawScroll.setFitToWidth(true);
+        rawResultTab.setContent(rawScroll);
+        
+        view.getTabs().add(rawResultTab);
         
         return view;
     }

@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.github.ormfux.esi.exception.ApplicationException;
-import com.github.ormfux.esi.ui.component.JsonNodeTree;
 import com.github.ormfux.simple.di.annotations.Bean;
 import com.github.ormfux.simple.di.annotations.BeanConstructor;
 
@@ -26,11 +25,15 @@ public class JsonService {
         prettyWriter = jsonMapper.writerWithDefaultPrettyPrinter();
     }
     
-    public JsonNodeTree createJsonFXTree(final String json, final int initialExpandedLevels) {
+    public JsonNode createTree(final String json, final String rootPath) {
         try {
-            final JsonNode jsonRootNote = jsonMapper.readTree(json);
+            final JsonNode rootNode = jsonMapper.readTree(json).at(rootPath);
             
-            return new JsonNodeTree(jsonRootNote, initialExpandedLevels);
+            if (rootNode.isMissingNode()) {
+                return null;
+            } else {
+                return rootNode;
+            }
         } catch (JsonProcessingException e) {
             //swallow this Exception for easy hiding in UI.
             return null;
@@ -63,7 +66,13 @@ public class JsonService {
     
     public JsonNode readTreeFromPath(final String json, final String path) {
         try {
-            return jsonMapper.readTree(json).at(path);
+            final JsonNode mainTree = jsonMapper.readTree(json);
+            
+            if (path != null) {
+                return mainTree.at(path);
+            } else {
+                return mainTree;
+            }
         } catch (JsonProcessingException e) {
             throw new ApplicationException("Error processing JSON data.", e);
         }

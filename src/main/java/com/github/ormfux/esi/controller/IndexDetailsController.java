@@ -10,6 +10,7 @@ import com.github.ormfux.esi.model.index.mapping.ESIndexMappingProperty;
 import com.github.ormfux.esi.service.ESRestClient;
 import com.github.ormfux.esi.service.JsonService;
 import com.github.ormfux.esi.service.ManageIndexService;
+import com.github.ormfux.esi.service.QueryResultTransformService;
 import com.github.ormfux.simple.di.annotations.Bean;
 import com.github.ormfux.simple.di.annotations.BeanConstructor;
 
@@ -21,6 +22,8 @@ public class IndexDetailsController {
     
     private final ManageIndexService manageIndexService;
     
+    private QueryResultTransformService resultTransformService;
+    
     private final JsonService jsonService;
     
     private final ESRestClient restClient;
@@ -30,21 +33,25 @@ public class IndexDetailsController {
     private ESIndex index;
     
     @BeanConstructor
-    public IndexDetailsController(final ESRestClient restClient, final ManageIndexService manageIndexService, final JsonService jsonService) {
+    public IndexDetailsController(final ESRestClient restClient, 
+                                  final ManageIndexService manageIndexService,
+                                  final QueryResultTransformService resultTransformService,
+                                  final JsonService jsonService) {
         this.manageIndexService = manageIndexService;
         this.restClient = restClient;
+        this.resultTransformService = resultTransformService;
         this.jsonService = jsonService;
     }
     
     public ESSearchResult search(final String query) {
         final String esResponse = returnResponseContent(restClient.sendPostRequest(index.getConnection(), index.getName() + "/_search?pretty", query));
         
-        return new ESSearchResult(esResponse, jsonService.createJsonFXTree(esResponse, 3));
+        return new ESSearchResult(esResponse, resultTransformService.createJsonFXTree(esResponse, 3), resultTransformService.createTable(esResponse));
     }
     
     public ESSearchResult searchDocument(final String documentId) {
         final String esResponse = returnResponseContent(restClient.sendGetRequest(index.getConnection(), index.getName() + "/_doc/" + documentId + "?pretty"));
-        return new ESSearchResult(esResponse, jsonService.createJsonFXTree(esResponse, 300));
+        return new ESSearchResult(esResponse, resultTransformService.createJsonFXTree(esResponse, 300), resultTransformService.createTable(esResponse));
     }
     
     public String searchDocumentForUpdate(final String documentId) {

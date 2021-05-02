@@ -6,6 +6,7 @@ import com.github.ormfux.esi.model.alias.ESMultiIndexAlias;
 import com.github.ormfux.esi.service.ESRestClient;
 import com.github.ormfux.esi.service.JsonService;
 import com.github.ormfux.esi.service.ManageAliasService;
+import com.github.ormfux.esi.service.QueryResultTransformService;
 import com.github.ormfux.simple.di.annotations.Bean;
 import com.github.ormfux.simple.di.annotations.BeanConstructor;
 
@@ -17,6 +18,8 @@ public class AliasDetailsController {
     
     private final ManageAliasService manageAliasService;
     
+    private final QueryResultTransformService resultTransformService;
+    
     private final JsonService jsonService;
     
     private final ESRestClient restClient;
@@ -26,15 +29,19 @@ public class AliasDetailsController {
     private ESMultiIndexAlias alias;
     
     @BeanConstructor
-    public AliasDetailsController(final ESRestClient restClient, final ManageAliasService manageAliasService, final JsonService jsonService) {
+    public AliasDetailsController(final ESRestClient restClient, 
+                                  final ManageAliasService manageAliasService,
+                                  final QueryResultTransformService resultTransformService,
+                                  final JsonService jsonService) {
         this.manageAliasService = manageAliasService;
         this.restClient = restClient;
+        this.resultTransformService = resultTransformService;
         this.jsonService = jsonService;
     }
     
     public ESSearchResult search(final String query) {
         final String esResponse = returnResponseContent(doSearch(query));
-        return new ESSearchResult(esResponse, jsonService.createJsonFXTree(esResponse, 3));
+        return new ESSearchResult(esResponse, resultTransformService.createJsonFXTree(esResponse, 3), resultTransformService.createTable(esResponse));
     }
 
     private ESResponse doSearch(final String query) {
@@ -43,7 +50,7 @@ public class AliasDetailsController {
     
     public ESSearchResult searchDocument(final String documentId) {
         final String esResponse = returnResponseContent(doSearchDocument(documentId));
-        return new ESSearchResult(esResponse, jsonService.createJsonFXTree(esResponse, 300));
+        return new ESSearchResult(esResponse, resultTransformService.createJsonFXTree(esResponse, 300), resultTransformService.createTable(esResponse));
     }
 
     private ESResponse doSearchDocument(final String documentId) {
