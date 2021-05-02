@@ -2,13 +2,24 @@
 
 A client GUI for Elasticsearch. The client is implemented with JavaFx, is calling the REST API of Elasticsearch, and displaying the results in its GUI.
 
-## Main Features
-
 ![Main UI](/images/main-ui.png)
+
+* [Running and Installation](#running-and-installation)
+  + [From Source](#from-source)
+  + [Pre-Build Releases](#pre-build-releases)
+* [Features](#features)
+* [Connections, Indices, and Aliases](#connections--indices--and-aliases)
+* [Working with an Index or Alias](#working-with-an-index-or-alias)
+  + [Details View](#details-view)
+  + [Document View](#document-view)
+  + [Query View](#query-view)
+    - [Defining the Query](#defining-the-query)
+    - [Search Results](#search-results)
+* [Expert View](#expert-view)
 
 ## Running and Installation
 
-The Elasticsearch Inspector requires Java 11. You can download it from https://adoptopenjdk.net/
+The Elasticsearch Inspector requires Java 11. You can download it from [https://adoptopenjdk.net/](https://adoptopenjdk.net/).
 
 To run the inspector execute the start script found in the "bin" directory in the inspector's installation directory.
 
