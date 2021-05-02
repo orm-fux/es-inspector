@@ -80,7 +80,9 @@ public class IndexDocumentView extends SplitPane {
         saveButton.managedProperty().bind(saveButton.visibleProperty());
         saveButton.disableProperty().bind(documentInputField.textProperty().isEmpty().or(documentIdField.textProperty().isEmpty()).or(runningIcon.visibleProperty()));
         saveButton.setAction(() -> {
-            rawResultField.setText(indexController.saveDocument(documentIdField.getText(), documentInputField.getText()));
+            rawResultField.setText(indexController.saveDocument(documentIdField.getText(), 
+                                                                documentInputField.getText(),
+                                                                actionCombobox.getSelectionModel().getSelectedItem() == DocumentAction.CHANGE));
             treeResultField.setTree(null);
         });
         
@@ -94,6 +96,7 @@ public class IndexDocumentView extends SplitPane {
             
             switch (newSel) {
                 case CHANGE:
+                case CREATE:
                     documentInputField.setVisible(true);
                     saveButton.setVisible(true);
                     
@@ -157,6 +160,8 @@ public class IndexDocumentView extends SplitPane {
     
     private static enum DocumentAction {
         SEARCH,
+        
+        CREATE,
         
         CHANGE,
         

@@ -2,6 +2,7 @@ package com.github.ormfux.esi.controller;
 
 import java.util.List;
 
+import com.github.ormfux.esi.exception.ApplicationException;
 import com.github.ormfux.esi.model.ESResponse;
 import com.github.ormfux.esi.model.ESSearchResult;
 import com.github.ormfux.esi.model.index.ESIndex;
@@ -50,12 +51,12 @@ public class IndexDetailsController {
     }
     
     public ESSearchResult searchDocument(final String documentId) {
-        final String esResponse = returnResponseContent(restClient.sendGetRequest(index.getConnection(), index.getName() + "/_doc/" + documentId + "?pretty"));
+        final String esResponse = returnResponseContent(doSearchDocument(documentId));
         return new ESSearchResult(esResponse, resultTransformService.createJsonFXTree(esResponse, 300), resultTransformService.createTable(esResponse));
     }
-    
+
     public String searchDocumentForUpdate(final String documentId) {
-        final ESResponse response = restClient.sendGetRequest(index.getConnection(), index.getName() + "/_doc/" + documentId + "?pretty");
+        final ESResponse response = doSearchDocument(documentId);
         
         if (response.isOk()) {
             return jsonService.findNodeAsString(response.getResponseBody(), "_source");
@@ -68,8 +69,12 @@ public class IndexDetailsController {
         return returnResponseContent(restClient.sendDeleteRequest(index.getConnection(), index.getName() + "/_doc/" + documentId + "?pretty"));
     }
     
-    public String saveDocument(final String documentId, final String document) {
-        return returnResponseContent(restClient.sendPutRequest(index.getConnection(), index.getName() + "/_doc/" + documentId + "?pretty", document));
+    public String saveDocument(final String documentId, final String document, final boolean update) {
+        if (!update && doSearchDocument(documentId).isOk()) {
+            throw new ApplicationException("A document with id '" + documentId + "' already exists", null);
+        } else {
+            return returnResponseContent(restClient.sendPutRequest(index.getConnection(), index.getName() + "/_doc/" + documentId + "?pretty", document));
+        }
     }
     
     public List<ESIndexMappingProperty> lookupIndexMappings() {
@@ -90,6 +95,10 @@ public class IndexDetailsController {
     
     public String lookupElasticsearchVersion() {
         return manageIndexService.findElasticsearchVersion(index);
+    }
+    
+    private ESResponse doSearchDocument(final String documentId) {
+        return restClient.sendGetRequest(index.getConnection(), index.getName() + "/_doc/" + documentId + "?pretty");
     }
     
     private String returnResponseContent(final ESResponse response) {

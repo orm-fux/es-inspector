@@ -81,7 +81,9 @@ public class AliasDocumentView extends SplitPane {
         saveButton.managedProperty().bind(saveButton.visibleProperty());
         saveButton.disableProperty().bind(documentInputField.textProperty().isEmpty().or(documentIdField.textProperty().isEmpty()).or(runningIcon.visibleProperty()));
         saveButton.setAction(() -> {
-            rawResultField.setText(aliasController.saveDocument(documentIdField.getText(), documentInputField.getText()));
+            rawResultField.setText(aliasController.saveDocument(documentIdField.getText(), 
+                                                                documentInputField.getText(), 
+                                                                actionCombobox.getSelectionModel().getSelectedItem() == DocumentAction.CHANGE));
             treeResultField.setTree(null);
         });
         
@@ -94,6 +96,7 @@ public class AliasDocumentView extends SplitPane {
             saveButton.setVisible(false);
             
             switch (newSel) {
+                case CREATE:
                 case CHANGE:
                     documentInputField.setVisible(true);
                     saveButton.setVisible(true);
@@ -170,6 +173,8 @@ public class AliasDocumentView extends SplitPane {
     
     private static enum DocumentAction {
         SEARCH,
+        
+        CREATE,
         
         CHANGE,
         
