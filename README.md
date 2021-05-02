@@ -10,12 +10,12 @@ A client GUI for Elasticsearch. The client is implemented with JavaFx, is callin
   * [From Source](#from-source)
   * [Pre-Build Releases](#pre-build-releases)
 * [Features](#features)
-* [Connections, Indices, and Aliases](#connections--indices--and-aliases)
-* [Working with an Index or Alias](#working-with-an-index-or-alias)
-  * [Details View](#details-view)
-  * [Document View](#document-view)
-  * [Query View](#query-view)
-* [Expert View](#expert-view)
+  * [Connections, Indices, and Aliases](#connections--indices--and-aliases)
+  * [Working with an Index or Alias](#working-with-an-index-or-alias)
+    * [Details View](#details-view)
+    * [Document View](#document-view)
+    * [Query View](#query-view)
+  * [Expert View](#expert-view)
 
 ## Running and Installation
 
