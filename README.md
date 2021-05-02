@@ -97,11 +97,11 @@ You can export the search results with the export button in the top right corner
 
 ![Raw JSON Result](images/result-view_raw.png)
 
-In the tree view you can copy a sub-tree by selecting it and using the keyboard shortcut `Ctrl+C`. It will be copied as JSON string.
+In the tree view you can copy a sub-tree by selecting it and using the keyboard shortcut `Ctrl+C`. It will be copied as JSON String.
 
 ![Tree Result](images/result-view_tree.png)
 
-The table view allows you to re-order the columns via drag-&_drop of the column headers, as well as sorting by column on the column headers.
+The table view allows you to re-order the columns via drag-&-drop of the column headers, as well as sorting by column on the column headers.
 
 ![Table Result](images/result-view_table.png)
 
