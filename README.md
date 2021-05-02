@@ -4,6 +4,8 @@ A client GUI for Elasticsearch. The client is implemented with JavaFx, is callin
 
 ![Main UI](/images/main-ui.png)
 
+## Table of Contents
+
 * [Running and Installation](#running-and-installation)
   + [From Source](#from-source)
   + [Pre-Build Releases](#pre-build-releases)
