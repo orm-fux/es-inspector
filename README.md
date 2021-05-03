@@ -1,6 +1,6 @@
 # Elasticsearch Inspector
 
-A client GUI for Elasticsearch. The client is implemented with JavaFx, is calling the REST API of Elasticsearch, and displaying the results in its GUI.
+"Elasticsearch Inspector" is a simple GUI for Elasticsearch, which itself does not provide one. The inspector is a cross-platform desktop application implemented with JavaFX and provides a number of convenient features to access and work with Elasticsearch clusters.
 
 ![Main UI](/images/main-ui.png)
 
@@ -19,29 +19,33 @@ A client GUI for Elasticsearch. The client is implemented with JavaFx, is callin
 
 ## Running and Installation
 
-The Elasticsearch Inspector requires Java 11. You can download it from [https://adoptopenjdk.net/](https://adoptopenjdk.net/).
+### Requirements
+
+The Elasticsearch Inspector requires Java 11. Java 11 is *not* bundled with the releases of the inspector. You can download it from [https://adoptopenjdk.net/](https://adoptopenjdk.net/).
+
+### Running
 
 To run the inspector execute the start script found in the "bin" directory in the inspector's installation directory.
 
-### From Source
+### Installation from Source
 
-To build the application from source you need [Gradle](https://gradle.org/). Clone the repository and switch to the desired tag. Then issue a simple `gradle clean build`. You will find the assembled distributions in the "build/distributions" folder. There will be one for Windows, one for Linux, and one for MacOS.
+To build the application from source you need [Gradle](https://gradle.org/). Clone the repository and switch to the desired tag. Then issue a simple `gradle clean build`. You will find the assembled distributions in the "build/distributions" folder. There's one for Windows, one for Linux, and one for MacOS.
 
-### Pre-Build Releases
+### Installation from Pre-Build Releases
 
-Download the desired package from the project's GitHub [releases](https://github.com/orm-fux/es-inspector/releases) page. Each release has a pre-build archive for the major platforms: Windows, Linux, and MacOS. Simply extract the archive to a convenient location and you're good to go. It is recommended that you download the [latest release](https://github.com/orm-fux/es-inspector/releases/latest).
+Download the desired package from the project's GitHub [releases](https://github.com/orm-fux/es-inspector/releases) page. Each release has a pre-build archive for each of the major platforms: Windows, Linux, and MacOS. Simply extract the archive to a convenient location and you're good to go. It is recommended that you download the [latest release](https://github.com/orm-fux/es-inspector/releases/latest).
 
 ## Features
 
 ### Connections, Indices, and Aliases
 
-The inspector allows to save multiple connections to Elasticsearch. For each connection you need to specify a name, URL to the Elasticsearch host, and the credentials to use. Optionally you can define default filters that are applied to the listings of the aliases and indices of the connection. 
+The inspector allows to save multiple connections to different Elasticsearch clusters - or to the same cluster, but with different credentials. For each connection you need to specify a name, URL to the Elasticsearch cluster, and the credentials to use. As credentials you can provide "none", basic username/password authentication, or API key authentication. The credentials are stored encrypted on your hard drive. Optionally you can define default filters that are applied to the listings of the aliases and indices of the connection. 
 
 ![Create/Edit connection](images/connection_create-or-edit.jpg)
 
-To open a connection click the "Open" button or double click on the connection. When you "open" a connection the inspector looks up all the indices and aliases for it. If you've specified some default filters they are automatically applied to the list - allowing you to focus directly on only those indices and aliases that you need (your host might have a lot of indices/aliases and you always work with only a few of them).
+To open a connection click the <img src="https://github.com/orm-fux/es-inspector/blob/master/src/main/resources/com/github/ormfux/esi/ui/images/open.png?raw=true" height="16" title="'Open'"/> button or double click on the connection. When you "open" a connection the inspector looks up all the indices and aliases for it. If you've specified some default filters they are automatically applied to the list - allowing you to focus directly on only those indices and aliases that you need (your host might have a lot of indices/aliases and always work with only a few of them).
 
-To close everything related to a connection you can use the "close" connection button. This will close all views in the inspector that are in some way related to the connection and clear the index and alias listing views.
+To close everything related to a connection you can use the <img src="https://github.com/orm-fux/es-inspector/blob/master/src/main/resources/com/github/ormfux/esi/ui/images/close.png?raw=true" height="16" title="'Close'"/> connection button. This will close all views in the inspector that are in some way related to the connection and clear the index and alias listing views.
 
 The index and alias listing views have a small action bar that allow you to "open" them, create new ones, or delete them. When deleting an alias you are prompted to select for which alias you want to delete the index.
 
