@@ -11,6 +11,8 @@ import com.github.ormfux.esi.model.settings.connection.ESConnection;
 import com.github.ormfux.esi.service.ESConnectionUsageStatusService;
 import com.github.ormfux.esi.service.ESRestClient;
 import com.github.ormfux.esi.service.JsonService;
+import com.github.ormfux.esi.service.QueryTemplateService;
+import com.github.ormfux.esi.util.Constants;
 import com.github.ormfux.simple.di.annotations.Bean;
 import com.github.ormfux.simple.di.annotations.BeanConstructor;
 
@@ -21,9 +23,9 @@ import lombok.Setter;
 @Bean
 public class ManageConnectionsController {
     
-    private static final File CONNECTION_SETTINGS_DIR = new File(System.getProperty("user.home") + "/.esinspector/connections"); 
-    
     private final JsonService jsonService;
+    
+    private final QueryTemplateService queryTemplateService;
     
     private final ESConnectionUsageStatusService connectionStatusService;
     
@@ -39,13 +41,15 @@ public class ManageConnectionsController {
     @BeanConstructor
     public ManageConnectionsController(final JsonService jsonService, 
                                        final ESRestClient restClient, 
-                                       final ESConnectionUsageStatusService connectionStatusService) {
+                                       final ESConnectionUsageStatusService connectionStatusService,
+                                       final QueryTemplateService queryTemplateService) {
         this.jsonService = jsonService;
         this.restClient = restClient;
         this.connectionStatusService = connectionStatusService;
+        this.queryTemplateService = queryTemplateService;
         
-        if (!CONNECTION_SETTINGS_DIR.exists()) {
-            CONNECTION_SETTINGS_DIR.mkdirs();
+        if (!Constants.CONNECTION_SETTINGS_DIR.exists()) {
+            Constants.CONNECTION_SETTINGS_DIR.mkdirs();
         }
         
         loadConnections();
@@ -66,17 +70,18 @@ public class ManageConnectionsController {
     public void createConnection(final ESConnection newConnection) {
         final String id = UUID.randomUUID().toString();
         newConnection.setId(id);
-        jsonService.writeToFile(new File(CONNECTION_SETTINGS_DIR, id +".json"), newConnection);
+        jsonService.writeToFile(new File(Constants.CONNECTION_SETTINGS_DIR, id +".json"), newConnection);
         loadConnections();
     }
     
     public void deleteConnection(final ESConnection deletedConnection) {
-        new File(CONNECTION_SETTINGS_DIR, deletedConnection.getId() +".json").delete();
+        new File(Constants.CONNECTION_SETTINGS_DIR, deletedConnection.getId() +".json").delete();
+        queryTemplateService.deleteTemplateCollection(deletedConnection.getId());
         loadConnections();
     }
     
     public void editConnection(final ESConnection editedConnection) {
-        new File(CONNECTION_SETTINGS_DIR, editedConnection.getId() +".json").delete();
+        new File(Constants.CONNECTION_SETTINGS_DIR, editedConnection.getId() +".json").delete();
         createConnection(editedConnection);
     }
     
@@ -95,7 +100,7 @@ public class ManageConnectionsController {
     private void loadConnections() {
         List<ESConnection> unsortedConnections = new ArrayList<>();
         
-        for (final File connectionFile : CONNECTION_SETTINGS_DIR.listFiles()) {
+        for (final File connectionFile : Constants.CONNECTION_SETTINGS_DIR.listFiles()) {
             final ESConnection connection = jsonService.readValueFromFile(connectionFile, ESConnection.class);
             unsortedConnections.add(connection);
         }

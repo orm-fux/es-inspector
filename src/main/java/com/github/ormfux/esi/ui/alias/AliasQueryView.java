@@ -13,6 +13,7 @@ import com.github.ormfux.esi.ui.component.JsonTreeView;
 import com.github.ormfux.esi.ui.component.SourceCodeTextArea;
 import com.github.ormfux.esi.ui.images.ImageButton;
 import com.github.ormfux.esi.ui.images.ImageKey;
+import com.github.ormfux.esi.ui.template.QueryTemplatesMenu;
 
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -20,6 +21,7 @@ import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuBar;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
@@ -59,7 +61,7 @@ public class AliasQueryView extends SplitPane {
         final VBox querySubView = new VBox(2);
         querySubView.setPadding(new Insets(2));
         
-        final Label queryLabel = new Label("Query");
+        final Label queryLabel = new Label("");
         queryLabel.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(queryLabel, Priority.ALWAYS);
         
@@ -72,7 +74,11 @@ public class AliasQueryView extends SplitPane {
             treeResultField.setTree(searchResult.getFxTree());
             Platform.runLater(() ->  tableResultField.setTableContent(searchResult.getTableData()));
         });
-        final HBox actionsBar = new HBox(2, queryLabel, searchButton, runningIcon);
+        
+        final MenuBar menuBar = new MenuBar();
+        menuBar.getMenus().add(new QueryTemplatesMenu(aliasController, queryField.textProperty(), this));
+        
+        final HBox actionsBar = new HBox(2, queryLabel, searchButton, menuBar, runningIcon);
         actionsBar.setAlignment(Pos.CENTER_LEFT);
         
         queryField.setText("{\n  \"from\": 0,\n  \"size\": 10,\n  \"query\": {\n    \"match_all\": {}\n  },\n  \"sort\": [],\n  \"aggs\": {}\n}");

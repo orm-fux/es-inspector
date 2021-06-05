@@ -7,10 +7,12 @@ import com.github.ormfux.esi.model.ESSearchResult;
 import com.github.ormfux.esi.model.index.ESIndex;
 import com.github.ormfux.esi.model.index.ESIndexSettings;
 import com.github.ormfux.esi.model.index.mapping.ESIndexMappingProperty;
+import com.github.ormfux.esi.model.settings.connection.ESConnection;
 import com.github.ormfux.esi.service.ESRestClient;
 import com.github.ormfux.esi.service.JsonService;
 import com.github.ormfux.esi.service.ManageIndexService;
 import com.github.ormfux.esi.service.QueryResultTransformService;
+import com.github.ormfux.esi.service.QueryTemplateService;
 import com.github.ormfux.simple.di.annotations.Bean;
 import com.github.ormfux.simple.di.annotations.BeanConstructor;
 
@@ -18,7 +20,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Bean(singleton = false)
-public class IndexDetailsController {
+public class IndexDetailsController extends AbstractQueryTemplateController {
     
     private final ManageIndexService manageIndexService;
     
@@ -36,7 +38,9 @@ public class IndexDetailsController {
     public IndexDetailsController(final ESRestClient restClient, 
                                   final ManageIndexService manageIndexService,
                                   final QueryResultTransformService resultTransformService,
-                                  final JsonService jsonService) {
+                                  final JsonService jsonService,
+                                  final QueryTemplateService queryTemplateService) {
+        super(queryTemplateService);
         this.manageIndexService = manageIndexService;
         this.restClient = restClient;
         this.resultTransformService = resultTransformService;
@@ -94,6 +98,11 @@ public class IndexDetailsController {
     
     public String lookupElasticsearchVersion() {
         return manageIndexService.findElasticsearchVersion(index);
+    }
+    
+    @Override
+    protected ESConnection getESConnection() {
+        return index.getConnection();
     }
     
     private ESResponse doSearchDocument(final String documentId) {

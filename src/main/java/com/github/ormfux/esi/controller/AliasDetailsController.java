@@ -3,10 +3,12 @@ package com.github.ormfux.esi.controller;
 import com.github.ormfux.esi.model.ESResponse;
 import com.github.ormfux.esi.model.ESSearchResult;
 import com.github.ormfux.esi.model.alias.ESMultiIndexAlias;
+import com.github.ormfux.esi.model.settings.connection.ESConnection;
 import com.github.ormfux.esi.service.ESRestClient;
 import com.github.ormfux.esi.service.JsonService;
 import com.github.ormfux.esi.service.ManageAliasService;
 import com.github.ormfux.esi.service.QueryResultTransformService;
+import com.github.ormfux.esi.service.QueryTemplateService;
 import com.github.ormfux.simple.di.annotations.Bean;
 import com.github.ormfux.simple.di.annotations.BeanConstructor;
 
@@ -14,7 +16,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Bean(singleton = false)
-public class AliasDetailsController {
+public class AliasDetailsController extends AbstractQueryTemplateController {
     
     private final ManageAliasService manageAliasService;
     
@@ -32,7 +34,9 @@ public class AliasDetailsController {
     public AliasDetailsController(final ESRestClient restClient, 
                                   final ManageAliasService manageAliasService,
                                   final QueryResultTransformService resultTransformService,
-                                  final JsonService jsonService) {
+                                  final JsonService jsonService,
+                                  final QueryTemplateService queryTemplateService) {
+        super(queryTemplateService);
         this.manageAliasService = manageAliasService;
         this.restClient = restClient;
         this.resultTransformService = resultTransformService;
@@ -81,6 +85,11 @@ public class AliasDetailsController {
     
     public String lookupElasticsearchVersion() {
         return manageAliasService.findElasticsearchVersion(alias);
+    }
+    
+    @Override
+    protected ESConnection getESConnection() {
+        return alias.getConnection();
     }
     
     private String returnResponseContent(final ESResponse response) {

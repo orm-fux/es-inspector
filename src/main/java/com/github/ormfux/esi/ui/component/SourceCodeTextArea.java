@@ -3,6 +3,7 @@ package com.github.ormfux.esi.ui.component;
 import java.util.Set;
 
 import javafx.application.Platform;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
@@ -110,6 +111,7 @@ public class SourceCodeTextArea extends TextArea {
             initStyle(StageStyle.UTILITY);
             
             final VBox content = new VBox(2);
+            content.setPadding(new Insets(3));
             
             final HBox searchFieldContainer = new HBox(2);
             HBox.setHgrow(searchField, Priority.ALWAYS);

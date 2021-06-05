@@ -11,3 +11,7 @@
     -fx-background-color: #0093ff;
     -fx-text-fill: white;
 }
+
+.menu-bar {
+  -fx-background-color: transparent;
+}

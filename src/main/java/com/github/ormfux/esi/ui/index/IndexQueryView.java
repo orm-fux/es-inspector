@@ -18,6 +18,7 @@ import com.github.ormfux.esi.ui.component.JsonTreeView;
 import com.github.ormfux.esi.ui.component.SourceCodeTextArea;
 import com.github.ormfux.esi.ui.images.ImageButton;
 import com.github.ormfux.esi.ui.images.ImageKey;
+import com.github.ormfux.esi.ui.template.QueryTemplatesMenu;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -30,6 +31,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MenuBar;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.SplitPane;
@@ -88,9 +90,6 @@ public class IndexQueryView extends SplitPane {
         final BorderPane querySubView = new BorderPane();
         querySubView.setPadding(new Insets(2));
         
-        final Label queryTypeLabel = new Label("Query Type");
-        queryTypeLabel.setMaxWidth(Double.MAX_VALUE);
-        
         final AsyncButton searchButton = new AsyncButton("Search");
         final Node runningIcon = searchButton.getRunningIndicator();
         searchButton.disableProperty().bind(queryField.textProperty().isEmpty().or(runningIcon.visibleProperty()));
@@ -114,7 +113,10 @@ public class IndexQueryView extends SplitPane {
             Platform.runLater(() ->  tableResultField.setTableContent(searchResult.getTableData()));
         });
         
-        final HBox actionsBar = new HBox(2, queryTypeLabel, queryTypeField, searchButton, runningIcon);
+        final MenuBar menuBar = new MenuBar();
+        menuBar.getMenus().add(new QueryTemplatesMenu(indexController, queryField.textProperty(), this));
+        
+        final HBox actionsBar = new HBox(2, queryTypeField, searchButton, menuBar, runningIcon);
         actionsBar.setAlignment(Pos.CENTER_LEFT);
         actionsBar.setPadding(new Insets(2));
         
@@ -132,9 +134,13 @@ public class IndexQueryView extends SplitPane {
                 switch (newView) {
                     case "Plain":
                         querySubView.setCenter(plainQuerySubView);
+                        menuBar.setVisible(true);
+                        menuBar.setManaged(true);
                         break;
                     case "Guided Boolean":
                         querySubView.setCenter(guidedQuerySubView);
+                        menuBar.setVisible(false);
+                        menuBar.setManaged(false);
                         break;
                 }
             }
