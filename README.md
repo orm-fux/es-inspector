@@ -120,8 +120,8 @@ If you know what you are doing you can open a "God Mode" view for each connectio
 
 ### Session Restore
 
-In the tab header for index, alias, and expert view you can see a small pin icon (<img src="https://github.com/orm-fux/es-inspector/blob/master/src/main/resources/com/github/ormfux/esi/ui/images/pin.png?raw=true" height="20" title="'Pin'"/>). Clicking on the icon marks the tab as being restored when the inspector is opened the next time - i.e. it is "pinned to the inspector session". Input fields and sub-tab selections are restored for pinned tabs. 
+In the tab header for index, alias, and expert view you can see a small pin icon (<img src="https://github.com/orm-fux/es-inspector/blob/master/src/main/resources/com/github/ormfux/esi/ui/images/unpin.png?raw=true" height="20" title="'Pin'"/>). Clicking on the icon marks the tab as being restored when the inspector is opened the next time - i.e. it is "pinned to the inspector session". Input fields and sub-tab selections are restored for pinned tabs. 
 
-To unpin a tab simply click on the unpin icon (<img src="https://github.com/orm-fux/es-inspector/blob/master/src/main/resources/com/github/ormfux/esi/ui/images/unpin.png?raw=true" height="20" title="'Unpin'"/>), which has taken the place of the pin icon. 
+To unpin a tab simply click on the unpin icon (<img src="https://github.com/orm-fux/es-inspector/blob/master/src/main/resources/com/github/ormfux/esi/ui/images/pin.png?raw=true" height="20" title="'Unpin'"/>), which has taken the place of the pin icon. 
 
 Depending on the pinned/unpinned state of the tab a different icon is displayed.
