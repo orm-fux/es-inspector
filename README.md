@@ -16,6 +16,7 @@
     * [Document View](#document-view)
     * [Query View](#query-view)
   * [Expert View](#expert-view)
+  * [Session Restore](#session-restore)
 
 ## Running and Installation
 
@@ -87,6 +88,8 @@ When using plain queries for searching enter the query in the text field. When q
 
 You can use the keyboard shortcut `Ctrl+F` to open a small search dialog to do some text searches in your query text. This keyboard shortcut is available for every "source code styled" text box in the inspector.
 
+Plain query texts can be saved as templates for later re-use. A template can be saved as global template, making it available for all Elasticsearch connections in the inspector, or as connection template. A connection template is only available for the currently queried connection.
+
 ![Plain Query](images/query-view_plain.png)
 
 When using assisted queries (named "Guided Boolean" in the inspector) you are presented with a small UI that allows you to compose a relatively simple `bool` query. Select the properties and their values for `must`, `must_not`, and `should`. You can compose arbitrary many properties.
@@ -114,3 +117,11 @@ The table view allows you to re-order the columns via drag-&-drop of the column 
 If you know what you are doing you can open a "God Mode" view for each connection. You do so by using the little button with lightning bolt icon (<img src="https://github.com/orm-fux/es-inspector/blob/master/src/main/resources/com/github/ormfux/esi/ui/images/god_mode.png?raw=true" height="20" title="'God Mode'"/>) at the top of the connections list. It will show you a simple view that allows to call any REST API endpoint for that connection. You are free to define whatever call you want. *Be careful: Requests executed in this view do NOT synchronize with the other views showing information for this connection!*
 
 ![God Mode View](images/god-mode-view.png)
+
+### Session Restore
+
+In the tab header for index, alias, and expert view you can see a small pin icon (<img src="https://github.com/orm-fux/es-inspector/blob/master/src/main/resources/com/github/ormfux/esi/ui/images/pin.png?raw=true" height="20" title="'Pin'"/>). Clicking on the icon marks the tab as being restored when the inspector is opened the next time - i.e. it is "pinned to the inspector session". Input fields and sub-tab selections are restored for pinned tabs. 
+
+To unpin a tab simply click on the unpin icon (<img src="https://github.com/orm-fux/es-inspector/blob/master/src/main/resources/com/github/ormfux/esi/ui/images/unpin.png?raw=true" height="20" title="'Unpin'"/>), which has taken the place of the pin icon. 
+
+Depending on the pinned/unpinned state of the tab a different icon is displayed.
