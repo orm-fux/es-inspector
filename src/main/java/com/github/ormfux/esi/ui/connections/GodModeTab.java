@@ -4,12 +4,14 @@ import java.util.function.Supplier;
 
 import com.github.ormfux.esi.controller.GodModeController;
 import com.github.ormfux.esi.model.ESResponse;
+import com.github.ormfux.esi.model.session.SessionGMTabData;
+import com.github.ormfux.esi.model.session.SessionTabData;
 import com.github.ormfux.esi.model.settings.connection.ESConnection;
 import com.github.ormfux.esi.ui.ESConnectedView;
 import com.github.ormfux.esi.ui.component.AsyncButton;
+import com.github.ormfux.esi.ui.component.RestorableTab;
 import com.github.ormfux.esi.ui.component.SourceCodeTextArea;
 import com.github.ormfux.esi.ui.images.ImageKey;
-import com.github.ormfux.esi.ui.images.ImageRegistry;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
@@ -19,17 +21,15 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
-import javafx.scene.control.Tab;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 
-public class GodModeTab extends Tab implements ESConnectedView {
+public class GodModeTab extends RestorableTab implements ESConnectedView {
     
     private final TextArea resultField = new SourceCodeTextArea();
     
@@ -37,16 +37,15 @@ public class GodModeTab extends Tab implements ESConnectedView {
     
     private final Text responseMessageText = new Text(" ");
     
+    private final TextArea queryField = new SourceCodeTextArea();
+    
+    private final TextField endpointField = new TextField();
+    
+    private ComboBox<String> httpMethodBox;
+    
     private final Supplier<ESConnection> connectionSupplier;
     
     public GodModeTab(final GodModeController godModeController) {
-        setClosable(true);
-        
-        final ImageView tabIcon = new ImageView(ImageRegistry.getImage(ImageKey.LIGHTNING));
-        tabIcon.setFitHeight(23);
-        tabIcon.setFitWidth(23);
-        setGraphic(tabIcon);
-        
         setText(godModeController.getConnection().getName() + ": God Mode");
         
         final SplitPane content = new SplitPane();
@@ -82,18 +81,15 @@ public class GodModeTab extends Tab implements ESConnectedView {
     }
     
     private VBox createQueryView(final GodModeController godModeController) {
-        final TextArea queryField = new SourceCodeTextArea();
-        
         final VBox querySubView = new VBox(2);
         querySubView.setPadding(new Insets(2));
         
-        final ComboBox<String> httpMethodBox = new ComboBox<>();
+        httpMethodBox = new ComboBox<>();
         httpMethodBox.getItems().addAll("GET", "POST", "PUT", "DELETE", "PATCH");
         httpMethodBox.getSelectionModel().select("GET");
         
         final Text baseUrlText = new Text(godModeController.getConnection().getUrl() + "/");
         
-        final TextField endpointField = new TextField();
         HBox.setHgrow(endpointField, Priority.ALWAYS);
         
         final AsyncButton searchButton = new AsyncButton("Execute");
@@ -126,5 +122,31 @@ public class GodModeTab extends Tab implements ESConnectedView {
     @Override
     public ESConnection getConnection() {
         return connectionSupplier.get();
+    }
+    
+    @Override
+    public SessionTabData getRestorableData() {
+        final SessionGMTabData tabData = new SessionGMTabData();
+        tabData.setConnectionId(getConnection().getId());
+        tabData.setHttpMethod(httpMethodBox.getSelectionModel().getSelectedItem());
+        tabData.setRequestBody(queryField.getText());
+        tabData.setEndpoint(endpointField.getText());
+        
+        return tabData;
+    }
+    
+    @Override
+    public void fillWithRestoreData(final SessionTabData tabData) {
+        setRestore(true);
+        
+        final SessionGMTabData restoredData = (SessionGMTabData) tabData;
+        httpMethodBox.getSelectionModel().select(restoredData.getHttpMethod());
+        queryField.setText(restoredData.getRequestBody());
+        endpointField.setText(restoredData.getEndpoint());
+    }
+    
+    @Override
+    protected ImageKey getTabIconKey() {
+        return ImageKey.LIGHTNING;
     }
 }

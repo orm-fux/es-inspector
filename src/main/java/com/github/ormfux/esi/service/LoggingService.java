@@ -70,6 +70,14 @@ public class LoggingService {
         addLogEntry(logEntry);
     }
     
+    public void addLogEntry(final Level level, final String message) {
+        final LogEntry logEntry = new LogEntry();
+        logEntry.setLevel(level);
+        logEntry.setMessage(message);
+        
+        addLogEntry(logEntry);
+    }
+    
     public synchronized void addLogEntry(final LogEntry logEntry) {
         Platform.runLater(() -> {
             logEntries.add(logEntry);

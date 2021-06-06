@@ -27,7 +27,11 @@ public enum ImageKey {
     
     APPLICATION("esg-icon.png"),
     
-    SAVE("save.png");
+    SAVE("save.png"),
+    
+    PIN("pin.png"),
+    
+    UNPIN("unpin.png");
 
     @Getter(AccessLevel.PROTECTED)
     private final String fileName;

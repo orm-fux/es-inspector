@@ -5,13 +5,14 @@ import static javafx.collections.FXCollections.observableArrayList;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.StringJoiner;
 
 import com.github.ormfux.esi.controller.IndexDetailsController;
 import com.github.ormfux.esi.exception.ApplicationException;
 import com.github.ormfux.esi.model.ESSearchResult;
+import com.github.ormfux.esi.model.session.GuidedBooleanCondition;
+import com.github.ormfux.esi.model.session.QueryType;
+import com.github.ormfux.esi.model.session.SessionIndexDetailsTabData;
 import com.github.ormfux.esi.ui.component.AsyncButton;
 import com.github.ormfux.esi.ui.component.JsonTableView;
 import com.github.ormfux.esi.ui.component.JsonTreeView;
@@ -43,14 +44,11 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
-import lombok.Getter;
 
 public class IndexQueryView extends SplitPane {
 
@@ -60,13 +58,9 @@ public class IndexQueryView extends SplitPane {
     
     private final VBox guidedQuerySubView = new VBox();
     
+    private GuidedBooleanView guidedQueryFieldsContainer;
+    
     private final TextArea queryField = new SourceCodeTextArea();
-    
-    private final List<GuidedBooleanQueryCondition> guidedQueryFields = new ArrayList<>(); 
-    
-    final TextField guidedFromField = new TextField("0");
-    
-    final TextField guidedSizeField = new TextField("10");
     
     private final TextArea rawResultField = new SourceCodeTextArea();
     
@@ -101,7 +95,7 @@ public class IndexQueryView extends SplitPane {
                     searchResult = indexController.search(queryField.getText());
                     break;
                 case "Guided Boolean":
-                    final String guidedQuery = buildGuidedQuery();
+                    final String guidedQuery = guidedQueryFieldsContainer.buildGuidedQuery();
                     searchResult = indexController.search(guidedQuery);
                     break;
                 default:
@@ -215,61 +209,13 @@ public class IndexQueryView extends SplitPane {
     }
     
     private void createGuidedQuerySubView(final ObservableList<String> properties) {
-        final GridPane content = new GridPane();
-        content.setHgap(2);
-        content.setVgap(3);
+        guidedQueryFieldsContainer = new GuidedBooleanView(properties);
         
-        final Button addButton = new Button("+");
-        GridPane.setHgrow(addButton, Priority.NEVER);
-        content.addRow(0, addButton);
-        
-        final Label pageLabel = new Label("From, Page Size");
-        GridPane.setHgrow(pageLabel, Priority.NEVER);
-        final HBox pageFieldsContainer = new HBox(2);
-        GridPane.setHgrow(pageFieldsContainer, Priority.NEVER);
-        guidedFromField.setPrefColumnCount(5);
-        guidedSizeField.setPrefColumnCount(5);
-        pageFieldsContainer.getChildren().addAll(guidedFromField, new Label(" - "), guidedSizeField);
-        pageFieldsContainer.setAlignment(Pos.CENTER_LEFT);
-        content.addRow(1, pageLabel, pageFieldsContainer);
-        
-        addButton.setOnAction(e -> {
-            final Button removeButton = new Button("x");
-            final GuidedBooleanQueryCondition newCondition = new GuidedBooleanQueryCondition(properties, removeButton);
-            guidedQueryFields.add(newCondition);
-            
-            GridPane.setRowIndex(pageLabel, guidedQueryFields.size() + 1);
-            GridPane.setRowIndex(pageFieldsContainer, guidedQueryFields.size() + 1);
-            
-            removeButton.setOnAction(e2 -> {
-                content.getChildren().removeAll(newCondition.getAllNodes());
-                
-                for (int idx = guidedQueryFields.indexOf(newCondition) + 1; idx < guidedQueryFields.size(); idx++) {
-                    for (final Node node : guidedQueryFields.get(idx).getAllNodes()) {
-                        GridPane.setRowIndex(node, idx);
-                    }
-                }
-                
-                guidedQueryFields.remove(newCondition);
-            });
-            
-            content.addRow(guidedQueryFields.size(), 
-                           newCondition.getRequired(), 
-                           newCondition.getPropertyName(),
-                           newCondition.getCondition(),
-                           newCondition.getValue(),
-                           newCondition.getToLabel(),
-                           newCondition.getValueTo(),
-                           removeButton);
-            
-        });
-        
-        addButton.fire();
-        
-        final ScrollPane scroll = new ScrollPane(content);
+        final ScrollPane scroll = new ScrollPane(guidedQueryFieldsContainer);
         scroll.setFitToHeight(true);
         scroll.setFitToWidth(true);
         scroll.setPadding(new Insets(2));
+        VBox.setVgrow(scroll, Priority.ALWAYS);
         
         guidedQuerySubView.getChildren().add(scroll);
     }
@@ -348,136 +294,34 @@ public class IndexQueryView extends SplitPane {
         return resultView;
     }
     
-    private String buildGuidedQuery() {
-        final StringBuilder query = new StringBuilder();
-        query.append("{ \"from\": ").append(guidedFromField.getText())
-             .append(", \"size\": ").append(guidedSizeField.getText())
-             .append(", \"query\": { \"bool\": { ");
-        
-        final StringJoiner mustConditions = new StringJoiner(", ", "[", "]");
-        mustConditions.setEmptyValue("{}");
-        
-        guidedQueryFields.stream()
-                         .filter(field -> "must".equals(field.getRequired().getSelectionModel().getSelectedItem()))
-                         .filter(field -> field.getPropertyName().getSelectionModel().getSelectedItem() != null)
-                         .map(this::mapGuidedCondition)
-                         .forEach(mustConditions::add);
-        
-        final StringJoiner mustNotConditions = new StringJoiner(", ", "[", "]");
-        mustNotConditions.setEmptyValue("{}");
-        
-        guidedQueryFields.stream()
-                         .filter(field -> "must_not".equals(field.getRequired().getSelectionModel().getSelectedItem()))
-                         .filter(field -> field.getPropertyName().getSelectionModel().getSelectedItem() != null)
-                         .map(this::mapGuidedCondition)
-                         .forEach(mustNotConditions::add);
-        
-        final StringJoiner shouldConditions = new StringJoiner(", ", "[", "]");
-        shouldConditions.setEmptyValue("{}");
-        
-        guidedQueryFields.stream()
-                         .filter(field -> "should".equals(field.getRequired().getSelectionModel().getSelectedItem()))
-                         .filter(field -> field.getPropertyName().getSelectionModel().getSelectedItem() != null)
-                         .map(this::mapGuidedCondition)
-                         .forEach(shouldConditions::add);
-        
-        final StringJoiner conditionGroupJoiner = new StringJoiner(", ");
-        
-        if (mustConditions.length() != 2) {
-            conditionGroupJoiner.add("\"must\": " + mustConditions);
-        }
-        
-        if (mustNotConditions.length() != 2) {
-            conditionGroupJoiner.add("\"must_not\": " + mustNotConditions);
-        }
-        
-        if (shouldConditions.length() != 2) {
-            conditionGroupJoiner.add("\"should\": " + shouldConditions);
-        }
-        
-        query.append(conditionGroupJoiner);
-        
-        query.append("} } }");
-        
-        return query.toString();
+    protected String getPlainQuery() {
+        return queryField.getText();
     }
-    
-    private String mapGuidedCondition(final GuidedBooleanQueryCondition condition) {
-        final StringBuilder mappedCondition = new StringBuilder("{");
-        
-        switch (condition.getCondition().getSelectionModel().getSelectedItem()) {
-            case "match":
-                mappedCondition.append("\"match\": {")
-                               .append("\"").append(condition.getPropertyName().getSelectionModel().getSelectedItem()).append("\": ")
-                               .append("\"").append(condition.getValue().getText()).append("\"")
-                               .append("}");
-                break;
-            case "term":
-                mappedCondition.append("\"term\": {")
-                               .append("\"").append(condition.getPropertyName().getSelectionModel().getSelectedItem()).append("\": ")
-                               .append("\"").append(condition.getValue().getText()).append("\"")
-                               .append("}");
-                break;
-            case "range":
-                mappedCondition.append("\"range\": {")
-                               .append("\"").append(condition.getPropertyName().getSelectionModel().getSelectedItem()).append("\": ")
-                               .append("{ \"gte\": ").append(condition.getValue().getText()).append(", \"lte\": ").append(condition.getValueTo().getText()).append("}")
-                               .append("}");
-                break;
-            case "exists":
-                mappedCondition.append("\"exists\": {")
-                               .append("\"field\": ")
-                               .append("\"").append(condition.getPropertyName().getSelectionModel().getSelectedItem()).append("\"")
-                               .append("}");
-                break;
+
+    protected QueryType getSelectedQueryType() {
+        if ("Plain".equals(queryTypeField.getSelectionModel().getSelectedItem())) {
+            return QueryType.PLAIN;
+        } else {
+            return QueryType.GUIDED_BOOLEAN;
         }
-        
-        mappedCondition.append("}");
-        
-        return mappedCondition.toString();
     }
-    
-    @Getter
-    private static class GuidedBooleanQueryCondition {
+
+    protected List<GuidedBooleanCondition> getGuidedBooleanQuery() {
+        return guidedQueryFieldsContainer.getRestorableGuidedBooleanQuery();
+    }
+
+    protected void fillWithData(final SessionIndexDetailsTabData viewData) {
+        queryField.setText(viewData.getPlainQuery());
         
-        private final ComboBox<String> propertyName;
+        guidedQueryFieldsContainer.restoreFields(viewData.getGuidedBooleanQuery());
         
-        private final ComboBox<String> condition;
-        
-        private final ComboBox<String> required;
-        
-        private final TextField value;
-        
-        private final Text toLabel = new Text(", ");
-        
-        private final TextField valueTo;
-        
-        private final Button removeButton;
-        
-        public GuidedBooleanQueryCondition(final ObservableList<String> selectableProperties, final Button removeButton) {
-            this.removeButton = removeButton;
-            propertyName = new ComboBox<>(selectableProperties);
-            
-            condition = new ComboBox<>(observableArrayList("match", "term", "range", "exists"));
-            condition.getSelectionModel().select("match");
-            
-            required = new ComboBox<>(observableArrayList("must", "must_not", "should"));
-            required.getSelectionModel().select("must");
-            
-            value = new TextField();
-            valueTo = new TextField();
-            
-            value.visibleProperty().bind(condition.getSelectionModel().selectedItemProperty().isNotEqualTo("exists"));
-            value.managedProperty().bind(condition.getSelectionModel().selectedItemProperty().isNotEqualTo("exists"));
-            
-            valueTo.visibleProperty().bind(condition.getSelectionModel().selectedItemProperty().isEqualTo("range"));
-            valueTo.managedProperty().bind(condition.getSelectionModel().selectedItemProperty().isEqualTo("range"));
-            toLabel.visibleProperty().bind(condition.getSelectionModel().selectedItemProperty().isEqualTo("range"));
-            toLabel.managedProperty().bind(condition.getSelectionModel().selectedItemProperty().isEqualTo("range"));
-        }
-        
-        public List<Node> getAllNodes() {
-            return List.of(propertyName, condition, required, value, toLabel, valueTo, removeButton);
+        switch (viewData.getSelectedQueryType()) {
+            case GUIDED_BOOLEAN:
+                queryTypeField.getSelectionModel().select("Guided Boolean");
+                break;
+            case PLAIN:
+                queryTypeField.getSelectionModel().select("Plain");
+                break;
         }
     }
 }

@@ -6,7 +6,6 @@ import static java.util.stream.Collectors.joining;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.List;
-import java.util.function.Supplier;
 
 import com.github.ormfux.esi.controller.IndexDetailsController;
 import com.github.ormfux.esi.model.index.ESIndexSettings;
@@ -53,14 +52,10 @@ public class IndexDetailsView extends ScrollPane {
     
     private final TableView<ESIndexMappingProperty> mappingPropertiesTable;
     
-    private final Supplier<IndexDetailsController> dataSupplier;
-    
     public IndexDetailsView(final IndexDetailsController indexController) {
         setPadding(new Insets(5));
         setFitToHeight(true);
         setFitToWidth(true);
-        
-        dataSupplier = () -> indexController;
         
         final GridPane detailsContainer = new GridPane();
         detailsContainer.setPadding(new Insets(5));
@@ -140,7 +135,8 @@ public class IndexDetailsView extends ScrollPane {
         detailsContainer.addRow(14, mappingLabel, mappingPropertiesTable);
         
         setContent(detailsContainer);
-        //getChildren().addAll(detailsContainer);
+        
+        refreshSettings(indexController);
     }
 
     private Label createLabel(final String text) {
@@ -201,20 +197,18 @@ public class IndexDetailsView extends ScrollPane {
         return mappingTable;
     }
     
-    public void refreshSettings() {
-        final IndexDetailsController data = dataSupplier.get();
+    private void refreshSettings(final IndexDetailsController indexController) {
+        connectionText.setText(indexController.getIndex().getConnection().getName());
+        nameText.setText(indexController.getIndex().getName());
+        urlText.setText(indexController.getIndex().getConnection().getUrl() + "/" + indexController.getIndex().getName());
+        storageSizeText.setText(indexController.getIndex().getStoreSize());
+        docsCountText.setText(indexController.getIndex().getDocsCount());
         
-        connectionText.setText(data.getIndex().getConnection().getName());
-        nameText.setText(data.getIndex().getName());
-        urlText.setText(data.getIndex().getConnection().getUrl() + "/" + data.getIndex().getName());
-        storageSizeText.setText(data.getIndex().getStoreSize());
-        docsCountText.setText(data.getIndex().getDocsCount());
+        healthText.setText(indexController.getIndex().getHealth());
+        aliasesText.setText(indexController.lookupIndexAliasNames().stream().collect(joining(", ")));
+        versionText.setText(indexController.lookupElasticsearchVersion());
         
-        healthText.setText(data.getIndex().getHealth());
-        aliasesText.setText(data.lookupIndexAliasNames().stream().collect(joining(", ")));
-        versionText.setText(data.lookupElasticsearchVersion());
-        
-        final ESIndexSettings settings = data.lookupIndexSettings();
+        final ESIndexSettings settings = indexController.lookupIndexSettings();
         
         if (settings != null) {
             shardsText.setText(settings.getShards());
@@ -223,7 +217,7 @@ public class IndexDetailsView extends ScrollPane {
             rawSettingsText.setText(settings.getRawSettings());
         }
         
-        final List<ESIndexMappingProperty> mappings = data.lookupIndexMappings();
+        final List<ESIndexMappingProperty> mappings = indexController.lookupIndexMappings();
         mappingPropertiesTable.getItems().setAll(mappings);
     }
     

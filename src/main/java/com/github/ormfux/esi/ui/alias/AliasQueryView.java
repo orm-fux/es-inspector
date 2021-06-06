@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import com.github.ormfux.esi.controller.AliasDetailsController;
 import com.github.ormfux.esi.exception.ApplicationException;
 import com.github.ormfux.esi.model.ESSearchResult;
+import com.github.ormfux.esi.model.session.SessionAliasDetailsTabData;
 import com.github.ormfux.esi.ui.component.AsyncButton;
 import com.github.ormfux.esi.ui.component.JsonTableView;
 import com.github.ormfux.esi.ui.component.JsonTreeView;
@@ -165,5 +166,13 @@ public class AliasQueryView extends SplitPane {
         AnchorPane.setBottomAnchor(tabView, 1.0);
         
         return resultView;
+    }
+
+    protected String getPlainQuery() {
+        return queryField.getText();
+    }
+
+    protected void fillWithData(final SessionAliasDetailsTabData restoreData) {
+        queryField.setText(restoreData.getPlainQuery());
     }
 }

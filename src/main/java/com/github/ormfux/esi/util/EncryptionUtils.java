@@ -70,7 +70,7 @@ public final class EncryptionUtils {
         
     }
     
-    private static String decodeText(final String text) {
+    public static String decodeText(final String text) {
         final ByteBuffer encryptedBytes = ByteBuffer.wrap(Base64.getDecoder().decode(text));
         
         final byte[] iv = new byte[IV_LENGTH_BYTE];
@@ -94,7 +94,7 @@ public final class EncryptionUtils {
         }
     }
     
-    private static String encodeText(final String text) {
+    public static String encodeText(final String text) {
         final byte[] salt = getRandomNonce(SALT_LENGTH_BYTE);
         final byte[] iv = getRandomNonce(IV_LENGTH_BYTE);
         

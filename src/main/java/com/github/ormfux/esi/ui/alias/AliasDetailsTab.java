@@ -3,29 +3,29 @@ package com.github.ormfux.esi.ui.alias;
 import java.util.function.Supplier;
 
 import com.github.ormfux.esi.controller.AliasDetailsController;
+import com.github.ormfux.esi.exception.ApplicationException;
+import com.github.ormfux.esi.model.session.DetailsTab;
+import com.github.ormfux.esi.model.session.SessionAliasDetailsTabData;
+import com.github.ormfux.esi.model.session.SessionTabData;
 import com.github.ormfux.esi.model.settings.connection.ESConnection;
 import com.github.ormfux.esi.ui.ESConnectedView;
+import com.github.ormfux.esi.ui.component.RestorableTab;
 import com.github.ormfux.esi.ui.images.ImageKey;
-import com.github.ormfux.esi.ui.images.ImageRegistry;
 
 import javafx.geometry.Side;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.TabClosingPolicy;
-import javafx.scene.image.ImageView;
 
-public class AliasDetailsTab extends Tab implements ESConnectedView {
+public class AliasDetailsTab extends RestorableTab implements ESConnectedView {
     
     private final Supplier<ESConnection> connectionSupplier;
     
+    private final Supplier<String> aliasNameSupplier;
+    
+    private final AliasQueryView queryView;
+    
     public AliasDetailsTab(final AliasDetailsController aliasController) {
-        setClosable(true);
-        
-        final ImageView tabIcon = new ImageView(ImageRegistry.getImage(ImageKey.ALIAS));
-        tabIcon.setFitHeight(23);
-        tabIcon.setFitWidth(23);
-        setGraphic(tabIcon);
-        
         setText(aliasController.getAlias().getConnection().getName() + ": " + aliasController.getAlias().getName());
         
         final TabPane details = new TabPane();
@@ -42,7 +42,7 @@ public class AliasDetailsTab extends Tab implements ESConnectedView {
         documentTab.setContent(documentView);
         details.getTabs().add(documentTab);
         
-        final AliasQueryView queryView = new AliasQueryView(aliasController);
+        queryView = new AliasQueryView(aliasController);
         final Tab queryTab = new Tab("Query");
         queryTab.setContent(queryView);
         details.getTabs().add(queryTab);
@@ -59,6 +59,7 @@ public class AliasDetailsTab extends Tab implements ESConnectedView {
         setContent(details);
         
         connectionSupplier = () -> aliasController.getAlias().getConnection();
+        aliasNameSupplier = () -> aliasController.getAlias().getName();
     }
     
     @Override
@@ -66,4 +67,61 @@ public class AliasDetailsTab extends Tab implements ESConnectedView {
         return connectionSupplier.get();
     }
     
+    @Override
+    public SessionTabData getRestorableData() {
+        final SessionAliasDetailsTabData tabData = new SessionAliasDetailsTabData();
+        tabData.setConnectionId(getConnection().getId());
+        tabData.setAliasName(aliasNameSupplier.get());
+        
+        final TabPane contentTabs = (TabPane) getContent();
+        final Tab selectedTab = contentTabs.getSelectionModel().getSelectedItem();
+        
+        if (selectedTab.getContent() instanceof AliasDetailsView) {
+            tabData.setSelectedTab(DetailsTab.DETAILS);
+        } else if (selectedTab.getContent() instanceof AliasDocumentView) {
+            tabData.setSelectedTab(DetailsTab.DOCUMENT);
+        } else if (selectedTab.getContent() instanceof AliasQueryView) {
+            tabData.setSelectedTab(DetailsTab.QUERY);
+        }
+        
+        tabData.setPlainQuery(queryView.getPlainQuery());
+        
+        return tabData;
+    }
+    
+    @Override
+    public void fillWithRestoreData(final SessionTabData tabData) {
+        setRestore(true);
+        
+        final SessionAliasDetailsTabData restoreData = (SessionAliasDetailsTabData) tabData;
+        final Class<?> selectedTabType;
+        
+        switch (restoreData.getSelectedTab()) {
+            case DETAILS:
+                selectedTabType = AliasDetailsView.class;
+                break;
+            case DOCUMENT:
+                selectedTabType = AliasDocumentView.class;
+                break;
+            case QUERY:
+                selectedTabType = AliasQueryView.class;
+                break;
+            default:
+                throw new ApplicationException("Unsupported selected tab type: " + restoreData.getSelectedTab(), null);
+        }
+        
+        final TabPane contentTabs = (TabPane) getContent();
+        contentTabs.getTabs()
+                   .stream()
+                   .filter(tab -> selectedTabType.isAssignableFrom(tab.getContent().getClass()))
+                   .findFirst()
+                   .ifPresent(tab -> contentTabs.getSelectionModel().select(tab));
+        
+        queryView.fillWithData(restoreData);
+    }
+    
+    @Override
+    protected ImageKey getTabIconKey() {
+        return ImageKey.ALIAS;
+    }
 }

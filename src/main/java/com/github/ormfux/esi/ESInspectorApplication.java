@@ -8,9 +8,19 @@ import java.util.stream.Collectors;
 import com.github.ormfux.esi.controller.AliasDetailsController;
 import com.github.ormfux.esi.controller.GodModeController;
 import com.github.ormfux.esi.controller.IndexDetailsController;
+import com.github.ormfux.esi.controller.InspectorSessionController;
 import com.github.ormfux.esi.controller.ManageAliasesController;
 import com.github.ormfux.esi.controller.ManageConnectionsController;
 import com.github.ormfux.esi.controller.ManageIndicesController;
+import com.github.ormfux.esi.model.LogEntry.Level;
+import com.github.ormfux.esi.model.alias.ESMultiIndexAlias;
+import com.github.ormfux.esi.model.index.ESIndex;
+import com.github.ormfux.esi.model.session.InspectorSession;
+import com.github.ormfux.esi.model.session.SessionAliasDetailsTabData;
+import com.github.ormfux.esi.model.session.SessionGMTabData;
+import com.github.ormfux.esi.model.session.SessionIndexDetailsTabData;
+import com.github.ormfux.esi.model.session.SessionTabData;
+import com.github.ormfux.esi.model.settings.connection.ESConnection;
 import com.github.ormfux.esi.service.ESConnectionUsageStatusService;
 import com.github.ormfux.esi.service.LoggingService;
 import com.github.ormfux.esi.ui.ConnectionSelectionView;
@@ -18,19 +28,34 @@ import com.github.ormfux.esi.ui.ESConnectedView;
 import com.github.ormfux.esi.ui.LoggingView;
 import com.github.ormfux.esi.ui.MainLayout;
 import com.github.ormfux.esi.ui.alias.AliasDetailsTab;
+import com.github.ormfux.esi.ui.component.RestorableTab;
 import com.github.ormfux.esi.ui.connections.GodModeTab;
 import com.github.ormfux.esi.ui.images.ImageKey;
 import com.github.ormfux.esi.ui.images.ImageRegistry;
 import com.github.ormfux.esi.ui.index.IndexDetailsTab;
-import com.github.ormfux.esi.ui.index.IndexDetailsTabPane;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.stage.Stage;
 
 public class ESInspectorApplication extends Application {
 
+    private final ESConnectionUsageStatusService connectionStatusService = getBean(ESConnectionUsageStatusService.class);
+    
+    private final ManageConnectionsController manageConnectionsController = getBean(ManageConnectionsController.class);
+    
+    private final ManageIndicesController manageIndicesController = getBean(ManageIndicesController.class);
+    
+    private final ManageAliasesController manageAliasesController = getBean(ManageAliasesController.class);
+    
+    private final InspectorSessionController sessionService = getBean(InspectorSessionController.class);
+    
+    private final LoggingService loggingService = getBean(LoggingService.class);
+    
+    private final TabPane mainTabs = new TabPane();
+    
     public static void start(String... args) {
         launch(args);
     }
@@ -40,27 +65,141 @@ public class ESInspectorApplication extends Application {
         primaryStage.getIcons().add(ImageRegistry.getImage(ImageKey.APPLICATION));
         primaryStage.setTitle("Elasticsearch Inspector");
         
-        final LoggingService loggingService = getBean(LoggingService.class);
-        
         Thread.setDefaultUncaughtExceptionHandler((thread, exception) -> loggingService.addLogEntry(exception));
         
-        final ESConnectionUsageStatusService connectionStatusService = getBean(ESConnectionUsageStatusService.class);
+        initMainControllers();
         
-        final ManageConnectionsController manageConnectionsController = getBean(ManageConnectionsController.class);
-        final ManageIndicesController manageIndicesController = getBean(ManageIndicesController.class);
-        final ManageAliasesController manageAliasesController = getBean(ManageAliasesController.class);
+        final ConnectionSelectionView connectionsListView = new ConnectionSelectionView(manageConnectionsController, manageIndicesController, manageAliasesController);
         
-        final IndexDetailsTabPane indexTabs = new IndexDetailsTabPane();
+        manageConnectionsController.setGodModeViewOpener(this::openGodModeTab);
+        manageIndicesController.setDetailsViewOpener(this::openIndexDetailsTab);
+        manageAliasesController.setDetailsViewOpener(this::openAliasDetailsTab);
         
+        final LoggingView loggingView = new LoggingView(loggingService);
+        
+        final Scene scene = new Scene(new MainLayout(connectionsListView, mainTabs, loggingView), 1280, 720);
+        scene.getStylesheets().add(ESInspectorApplication.class.getResource("ui/es-inspector.css").toExternalForm());
+        primaryStage.setScene(scene);
+        primaryStage.show();
+        
+        restorePreviousSession();
+        primaryStage.setOnCloseRequest(e -> {
+            saveCurrentSession();
+            System.exit(1);
+        });
+    }
+    
+    private void saveCurrentSession() {
+        loggingService.addLogEntry(Level.INFO, "Saving current session.");
+        final InspectorSession currentSession = new InspectorSession();
+        
+        mainTabs.getTabs()
+                .stream()
+                .filter(tab -> tab instanceof RestorableTab)
+                .map(tab -> (RestorableTab) tab)
+                .filter(RestorableTab::isRestore)
+                .map(RestorableTab::getRestorableData)
+                .forEach(currentSession::addTabData);
+        
+        sessionService.saveSession(currentSession);
+    }
+    
+    private void restorePreviousSession() {
+        loggingService.addLogEntry(Level.INFO, "Restoring previous session.");
+        final InspectorSession session = sessionService.loadSession();
+        
+        if (session.getTabData() != null) {
+            for (final SessionTabData tabData : session.getTabData()) {
+                if (tabData instanceof SessionAliasDetailsTabData) {
+                    final SessionAliasDetailsTabData aliasTabData = (SessionAliasDetailsTabData) tabData;
+                    final ESMultiIndexAlias alias = sessionService.lookupAlias(aliasTabData);
+                    
+                    if (alias != null) {
+                        final AliasDetailsTab tab = openAliasDetailsTab(alias);
+                        tab.fillWithRestoreData(aliasTabData);
+                    } else {
+                        loggingService.addLogEntry(Level.WARN, "Could not find connection or alias for alias name: " + aliasTabData.getAliasName());
+                    }
+                    
+                } else if (tabData instanceof SessionIndexDetailsTabData) {
+                    final SessionIndexDetailsTabData indexTabData = (SessionIndexDetailsTabData) tabData;
+                    final ESIndex index = sessionService.lookupIndex(indexTabData);
+                    
+                    if (index != null) {
+                        final IndexDetailsTab tab = openIndexDetailsTab(index);
+                        tab.fillWithRestoreData(indexTabData);
+                    } else {
+                        loggingService.addLogEntry(Level.WARN, "Could not find connection or index for index name: " + indexTabData.getIndexName());
+                    }
+
+                    
+                } else if (tabData instanceof SessionGMTabData) {
+                    final SessionGMTabData godModeTabData = (SessionGMTabData) tabData;
+                    final ESConnection connection = sessionService.lookupConnection(godModeTabData);
+                    
+                    if (connection != null) {
+                        final GodModeTab tab = openGodModeTab(connection);
+                        tab.fillWithRestoreData(godModeTabData);
+                    } else {
+                        loggingService.addLogEntry(Level.WARN, "Could not find connection for god mode tab.");
+                    }
+                }
+            }
+        }
+    }
+
+    private AliasDetailsTab openAliasDetailsTab(final ESMultiIndexAlias alias) {
+        connectionStatusService.connectionOpened(alias.getConnection().getId());
+        
+        final AliasDetailsController detailsController = getBean(AliasDetailsController.class);
+        detailsController.setAlias(alias);
+        
+        final AliasDetailsTab tab = new AliasDetailsTab(detailsController);
+        tab.setOnClosed(e -> connectionStatusService.connectionClosed(alias.getConnection().getId()));
+        mainTabs.getTabs().add(tab);
+        mainTabs.getSelectionModel().select(tab);
+        
+        return tab;
+    }
+
+    private IndexDetailsTab openIndexDetailsTab(final ESIndex index) {
+        connectionStatusService.connectionOpened(index.getConnection().getId());
+        
+        final IndexDetailsController detailsController = getBean(IndexDetailsController.class);
+        detailsController.setIndex(index);
+        
+        final IndexDetailsTab tab = new IndexDetailsTab(detailsController);
+        tab.setOnClosed(e -> connectionStatusService.connectionClosed(index.getConnection().getId()));
+        mainTabs.getTabs().add(tab);
+        mainTabs.getSelectionModel().select(tab);
+        
+        return tab;
+    }
+
+    private GodModeTab openGodModeTab(final ESConnection connection) {
+        connectionStatusService.connectionOpened(connection.getId());
+        
+        final GodModeController godModeController = getBean(GodModeController.class);
+        godModeController.setConnection(connection);
+        
+        final GodModeTab tab = new GodModeTab(godModeController);
+        tab.setOnClosed(e -> connectionStatusService.connectionClosed(connection.getId()));
+        mainTabs.getTabs().add(tab);
+        mainTabs.getSelectionModel().select(tab);
+        
+        return tab;
+    }
+
+    private void initMainControllers() {
         manageConnectionsController.addCloseConnectionHandler(connection -> {
-            final List<Tab> tabsToClose = indexTabs.getTabs()
+            final List<Tab> tabsToClose = mainTabs.getTabs()
                                                    .stream()
                                                    .filter(tab -> tab instanceof ESConnectedView)
                                                    .filter(tab -> ((ESConnectedView) tab).getConnection().getId().equals(connection.getId()))
                                                    .collect(Collectors.toList());
             
             tabsToClose.forEach(tab -> {
-                         indexTabs.getTabs().remove(tab);
+                         mainTabs.getTabs().remove(tab);
                          connectionStatusService.connectionClosed(((ESConnectedView) tab).getConnection().getId());
                      });
         });
@@ -76,53 +215,5 @@ public class ESInspectorApplication extends Application {
                 manageAliasesController.getSelectedConnection().set(null);
             }
         });
-        
-        final ConnectionSelectionView connectionsListView = new ConnectionSelectionView(manageConnectionsController, manageIndicesController, manageAliasesController);
-        manageConnectionsController.setGodModeViewOpener(connection -> {
-            connectionStatusService.connectionOpened(connection.getId());
-            
-            final GodModeController godModeController = getBean(GodModeController.class);
-            godModeController.setConnection(connection);
-            
-            final GodModeTab tab = new GodModeTab(godModeController);
-            tab.setOnClosed(e -> connectionStatusService.connectionClosed(connection.getId()));
-            indexTabs.getTabs().add(tab);
-            indexTabs.getSelectionModel().select(tab);
-        });
-        
-        
-        manageIndicesController.setDetailsViewOpener(index -> {
-            connectionStatusService.connectionOpened(index.getConnection().getId());
-            
-            final IndexDetailsController detailsController = getBean(IndexDetailsController.class);
-            detailsController.setIndex(index);
-            
-            final IndexDetailsTab tab = new IndexDetailsTab(detailsController);
-            tab.setOnClosed(e -> connectionStatusService.connectionClosed(index.getConnection().getId()));
-            indexTabs.getTabs().add(tab);
-            indexTabs.getSelectionModel().select(tab);
-            
-        });
-        
-        manageAliasesController.setDetailsViewOpener(alias -> {
-            connectionStatusService.connectionOpened(alias.getConnection().getId());
-            
-            final AliasDetailsController detailsController = getBean(AliasDetailsController.class);
-            detailsController.setAlias(alias);
-            
-            final AliasDetailsTab tab = new AliasDetailsTab(detailsController);
-            tab.setOnClosed(e -> connectionStatusService.connectionClosed(alias.getConnection().getId()));
-            indexTabs.getTabs().add(tab);
-            indexTabs.getSelectionModel().select(tab);
-        });
-        
-        final LoggingView loggingView = new LoggingView(loggingService);
-        
-        final Scene scene = new Scene(new MainLayout(connectionsListView, indexTabs, loggingView), 1280, 720);
-        scene.getStylesheets().add(ESInspectorApplication.class.getResource("ui/es-inspector.css").toExternalForm());
-        primaryStage.setScene(scene);
-        primaryStage.show();
-        
-        primaryStage.setOnCloseRequest(e -> System.exit(1));
     }
 }
