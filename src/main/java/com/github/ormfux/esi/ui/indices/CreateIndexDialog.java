@@ -1,7 +1,7 @@
 package com.github.ormfux.esi.ui.indices;
 
 import com.github.ormfux.esi.ui.component.SourceCodeTextArea;
-
+import com.github.ormfux.esi.util.DialogUtils;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -21,49 +21,50 @@ import lombok.Data;
 public class CreateIndexDialog extends Dialog<CreateIndexDialog.CreateData> {
 
     private final CreateData index;
-    
+
     private TextField nameField = new TextField();
-    
+
     private final TextArea propertiesField = new SourceCodeTextArea();
-    
+
     public CreateIndexDialog() {
         this.index = new CreateData();
-        
+        DialogUtils.configureForOperatingSystem(this);
+
         setTitle("Create Index");
         setResizable(true);
-        
+
         final DialogPane dialogPane = getDialogPane();
         dialogPane.setMinWidth(550);
         dialogPane.setMinHeight(300);
-        
+
         dialogPane.setContent(createContentGrid());
         dialogPane.getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
-        
+
         final Button okButton = (Button)dialogPane.lookupButton(ButtonType.OK);
         okButton.setDisable(true);
         okButton.setText("Save");
-        
+
         defineInputInteractions(okButton);
-        
+
         Platform.runLater(() -> nameField.requestFocus());
-        
+
         setResultConverter((dialogButton) -> {
             fillResult();
-            
+
             final ButtonData data =  dialogButton == null ? null : dialogButton.getButtonData();
             return data == ButtonData.OK_DONE ? this.index : null;
         });
     }
 
     private Node createContentGrid() {
-        Label nameLabel = new Label("Name"); 
+        Label nameLabel = new Label("Name");
         nameLabel.setPrefWidth(Region.USE_COMPUTED_SIZE);
 
         nameField.setMaxWidth(Double.MAX_VALUE);
         GridPane.setHgrow(nameField, Priority.ALWAYS);
         GridPane.setFillWidth(nameField, true);
-        
-        Label propertiesLabel = new Label("Properties"); 
+
+        Label propertiesLabel = new Label("Properties");
         propertiesLabel.setPrefWidth(Region.USE_COMPUTED_SIZE);
 
         propertiesField.setMaxWidth(Double.MAX_VALUE);
@@ -71,35 +72,35 @@ public class CreateIndexDialog extends Dialog<CreateIndexDialog.CreateData> {
         GridPane.setVgrow(propertiesField, Priority.ALWAYS);
         GridPane.setFillWidth(propertiesField, true);
         GridPane.setFillHeight(propertiesField, true);
-        
+
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setPrefWidth(300.0);
         grid.setMaxWidth(Double.MAX_VALUE);
         grid.setAlignment(Pos.CENTER_LEFT);
-        
+
         grid.add(nameLabel, 0, 0);
         grid.add(nameField, 1, 0);
         grid.add(propertiesLabel, 0, 1);
         grid.add(propertiesField, 1, 1);
-        
+
         return grid;
     }
 
     private void defineInputInteractions(final Button okButton) {
         okButton.disableProperty().bind(nameField.textProperty().isEmpty());
     }
-    
+
     private void fillResult() {
         index.setName(nameField.getText());
         index.setProperties(propertiesField.getText());
     }
-    
+
     @Data
     protected static class CreateData {
         private String name;
-        
+
         private String properties;
     }
-    
+
 }

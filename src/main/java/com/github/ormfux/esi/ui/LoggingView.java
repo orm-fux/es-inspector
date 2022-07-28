@@ -3,7 +3,7 @@ package com.github.ormfux.esi.ui;
 import com.github.ormfux.esi.model.LogEntry;
 import com.github.ormfux.esi.model.LogEntry.Level;
 import com.github.ormfux.esi.service.LoggingService;
-
+import com.github.ormfux.esi.util.DialogUtils;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -28,12 +28,12 @@ import javafx.scene.text.Text;
 import lombok.Getter;
 
 public class LoggingView extends BorderPane {
-    
+
     private final DetailsDialog detailsDialog = new DetailsDialog();
-    
+
     public LoggingView(final LoggingService loggingService) {
         final TableView<LogEntry> logEntryTable = new HeadlessAutoscrollTable<>(loggingService.getLogEntries());
-        
+
         logEntryTable.setRowFactory( tv -> {
             TableRow<LogEntry> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
@@ -48,14 +48,14 @@ public class LoggingView extends BorderPane {
             });
             return row ;
         });
-        
+
         final TableColumn<LogEntry, String> timestampColumn = new TableColumn<>();
         timestampColumn.setSortable(false);
         timestampColumn.setReorderable(false);
         timestampColumn.prefWidthProperty().bind(logEntryTable.widthProperty().multiply(0.13));
         timestampColumn.setCellValueFactory(new PropertyValueFactory<>("timestamp"));
         logEntryTable.getColumns().add(timestampColumn);
-        
+
         final TableColumn<LogEntry, Level> levelColumn = new TableColumn<>();
         levelColumn.setSortable(false);
         levelColumn.setReorderable(false);
@@ -71,7 +71,7 @@ public class LoggingView extends BorderPane {
                         setGraphic(null);
                     } else {
                         final Text text = new Text(item.name());
-                        
+
                         switch(item) {
                             case INFO:
                                 text.setFill(Color.GREEN);
@@ -90,14 +90,14 @@ public class LoggingView extends BorderPane {
             };
         });
         logEntryTable.getColumns().add(levelColumn);
-        
+
         final TableColumn<LogEntry, String> messageColumn = new TableColumn<>();
         messageColumn.setSortable(false);
         messageColumn.setReorderable(false);
         messageColumn.prefWidthProperty().bind(logEntryTable.widthProperty().multiply(0.3));
         messageColumn.setCellValueFactory(new PropertyValueFactory<>("message"));
         logEntryTable.getColumns().add(messageColumn);
-        
+
         final TableColumn<LogEntry, String> detailsColumn = new TableColumn<>();
         detailsColumn.setSortable(false);
         detailsColumn.setReorderable(false);
@@ -119,11 +119,11 @@ public class LoggingView extends BorderPane {
         });
         detailsColumn.setCellValueFactory(new PropertyValueFactory<>("details"));
         logEntryTable.getColumns().add(detailsColumn);
-        
+
         setPadding(new Insets(5));
         setCenter(logEntryTable);
     }
-    
+
     private static class HeadlessAutoscrollTable<T> extends TableView<T> {
         public HeadlessAutoscrollTable(final ObservableList<T> items) {
             super(items);
@@ -134,7 +134,7 @@ public class LoggingView extends BorderPane {
                 }
             });
         }
-        
+
         @Override
         public void resize(double width, double height) {
             super.resize(width, height);
@@ -145,37 +145,38 @@ public class LoggingView extends BorderPane {
             //header.setVisible(false);
         }
     }
-    
+
     @Getter
     private static class DetailsDialog extends Dialog<Void> {
-        
+
         private final Text timestampText = new Text();
-        
+
         private final Text levelText = new Text();
-        
+
         private final TextArea messageArea = new TextArea();
-        
-        private final TextArea detailsArea = new TextArea(); 
-        
+
+        private final TextArea detailsArea = new TextArea();
+
         public DetailsDialog() {
+            DialogUtils.configureForOperatingSystem(this);
             setTitle("Details");
             setResizable(true);
-            
+
             final DialogPane dialogPane = getDialogPane();
             dialogPane.setMinWidth(550);
             dialogPane.setMinHeight(300);
-            
+
             messageArea.setEditable(false);
             messageArea.setPrefRowCount(3);
             detailsArea.setEditable(false);
-            
+
             dialogPane.setContent(createContentGrid());
             dialogPane.getButtonTypes().addAll(ButtonType.OK);
-            
+
             final Button okButton = (Button)dialogPane.lookupButton(ButtonType.OK);
             okButton.setText("OK");
         }
-        
+
         private Node createContentGrid() {
             GridPane grid = new GridPane();
             grid.setHgap(10);
@@ -183,14 +184,14 @@ public class LoggingView extends BorderPane {
             grid.setPrefWidth(300.0);
             grid.setMaxWidth(Double.MAX_VALUE);
             grid.setAlignment(Pos.CENTER_LEFT);
-            
+
             grid.addRow(0, new Text("Timestamp:"), timestampText);
             grid.addRow(1, new Text("Level"), levelText);
             grid.addRow(2, new Text("Message"), messageArea);
             grid.addRow(3, new Text("Details"), detailsArea);
-            
+
             return grid;
         }
     }
-    
+
 }

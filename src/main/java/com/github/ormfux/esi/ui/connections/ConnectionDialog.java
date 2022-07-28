@@ -1,11 +1,9 @@
 package com.github.ormfux.esi.ui.connections;
 
-import java.util.function.Function;
-
 import com.github.ormfux.esi.model.settings.connection.ApiKeyAuthentication;
 import com.github.ormfux.esi.model.settings.connection.BasicAuthentication;
 import com.github.ormfux.esi.model.settings.connection.ESConnection;
-
+import com.github.ormfux.esi.util.DialogUtils;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.geometry.Pos;
@@ -25,42 +23,45 @@ import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
+import java.util.function.Function;
+
 public class ConnectionDialog extends Dialog<ESConnection> {
 
     private final ESConnection connection;
-    
+
     private TextField nameField = new TextField();
-    
+
     private TextField urlField = new TextField();
-    
+
     private ComboBox<AuthenticationType> authenticationTypeField = new ComboBox<>(FXCollections.observableArrayList(AuthenticationType.values()));
-    
+
     private final TextField apiKeyField = new TextField();
     private final TextField usernameField = new TextField();
     private final PasswordField passwordField = new PasswordField();
-    
+
     private final TextField indexFilterField = new TextField();
     private final TextField aliasFilterField = new TextField();
-    
+
     private final Text testResultText = new Text();
     private final Button testButton = new Button("Test Connection");
-    
+
     public ConnectionDialog(final ESConnection connection, final Function<ESConnection, String> testConnectionFunction) {
         final DialogPane dialogPane = getDialogPane();
-        
+        DialogUtils.configureForOperatingSystem(this);
+
         dialogPane.setContent(createContentGrid());
         dialogPane.getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
-        
+
         final Button okButton = (Button)dialogPane.lookupButton(ButtonType.OK);
         okButton.setDisable(true);
         okButton.setText("Save");
-        
+
         testButton.setOnAction(e -> {
             final ESConnection testConnection = new ESConnection();
             fillResult(testConnection);
-            
+
             final String esVersion = testConnectionFunction.apply(testConnection);
-            
+
             if (esVersion == null) {
                 testResultText.setText("Failed to connect!");
                 testResultText.setFill(Color.RED);
@@ -68,13 +69,13 @@ public class ConnectionDialog extends Dialog<ESConnection> {
                 testResultText.setText("Elasticsearch version: " + esVersion);
                 testResultText.setFill(Color.GREEN);
             }
-            
+
         });
-        
+
         testButton.disableProperty().bind(okButton.disableProperty());
-        
+
         defineInputInteractions(okButton);
-        
+
         if (connection == null) {
             this.connection = new ESConnection();
             initForCreate();
@@ -82,12 +83,12 @@ public class ConnectionDialog extends Dialog<ESConnection> {
             this.connection = connection;
             initForEdit();
         }
-        
+
         Platform.runLater(() -> nameField.requestFocus());
-        
+
         setResultConverter((dialogButton) -> {
             final ButtonData data = dialogButton == null ? null : dialogButton.getButtonData();
-            
+
             if (data == ButtonData.OK_DONE) {
                 fillResult(this.connection);
                 return this.connection;
@@ -103,7 +104,7 @@ public class ConnectionDialog extends Dialog<ESConnection> {
         urlField.setText(connection.getUrl());
         indexFilterField.setText(connection.getDefaultIndexFilter());
         aliasFilterField.setText(connection.getDefaultAliasFilter());
-        
+
         if (connection.getAuthentication() instanceof BasicAuthentication) {
             authenticationTypeField.setValue(AuthenticationType.BASIC);
             usernameField.setText(((BasicAuthentication) connection.getAuthentication()).getUsername());
@@ -120,70 +121,70 @@ public class ConnectionDialog extends Dialog<ESConnection> {
         setTitle("Create Connection");
         authenticationTypeField.setValue(AuthenticationType.NONE);
     }
-    
+
     private Node createContentGrid() {
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setPrefWidth(300);
         grid.setMaxWidth(Double.MAX_VALUE);
         grid.setAlignment(Pos.CENTER_LEFT);
-        
-        Label nameLabel = new Label("Name"); 
+
+        Label nameLabel = new Label("Name");
         nameLabel.setPrefWidth(Region.USE_COMPUTED_SIZE);
         nameField.setMaxWidth(Double.MAX_VALUE);
         GridPane.setHgrow(nameField, Priority.ALWAYS);
         GridPane.setFillWidth(nameField, true);
         grid.addRow(0, nameLabel, nameField);
-        
-        Label urlLabel = new Label("URL"); 
+
+        Label urlLabel = new Label("URL");
         urlLabel.setPrefWidth(Region.USE_COMPUTED_SIZE);
         urlField.setMaxWidth(Double.MAX_VALUE);
         GridPane.setHgrow(urlField, Priority.ALWAYS);
         GridPane.setFillWidth(urlField, true);
         grid.addRow(1, urlLabel, urlField);
-        
-        Label indexFilterLabel = new Label("Default Index Filter"); 
+
+        Label indexFilterLabel = new Label("Default Index Filter");
         indexFilterLabel.setPrefWidth(Region.USE_COMPUTED_SIZE);
         indexFilterField.setMaxWidth(Double.MAX_VALUE);
         GridPane.setHgrow(indexFilterField, Priority.ALWAYS);
         GridPane.setFillWidth(indexFilterField, true);
         grid.addRow(2, indexFilterLabel, indexFilterField);
-        
-        Label aliasFilterLabel = new Label("Default Alias Filter"); 
+
+        Label aliasFilterLabel = new Label("Default Alias Filter");
         aliasFilterLabel.setPrefWidth(Region.USE_COMPUTED_SIZE);
         aliasFilterField.setMaxWidth(Double.MAX_VALUE);
         GridPane.setHgrow(aliasFilterField, Priority.ALWAYS);
         GridPane.setFillWidth(aliasFilterField, true);
         grid.addRow(3, aliasFilterLabel, aliasFilterField);
-        
-        Label authenticationTypeLabel = new Label("Authentication Type"); 
+
+        Label authenticationTypeLabel = new Label("Authentication Type");
         authenticationTypeLabel.setPrefWidth(Region.USE_COMPUTED_SIZE);
         authenticationTypeField.setMaxWidth(Double.MAX_VALUE);
         GridPane.setHgrow(authenticationTypeField, Priority.ALWAYS);
         GridPane.setFillWidth(authenticationTypeField, true);
         grid.addRow(4, authenticationTypeLabel, authenticationTypeField);
-        
-        Label apiKeyLabel = new Label("API Key"); 
+
+        Label apiKeyLabel = new Label("API Key");
         apiKeyLabel.setPrefWidth(Region.USE_COMPUTED_SIZE);
         apiKeyField.setMaxWidth(Double.MAX_VALUE);
         GridPane.setHgrow(apiKeyField, Priority.ALWAYS);
         GridPane.setFillWidth(apiKeyField, true);
         grid.addRow(5, apiKeyLabel, apiKeyField);
-        
-        Label usernameLabel = new Label("Username"); 
+
+        Label usernameLabel = new Label("Username");
         usernameLabel.setPrefWidth(Region.USE_COMPUTED_SIZE);
         usernameField.setMaxWidth(Double.MAX_VALUE);
         GridPane.setHgrow(usernameField, Priority.ALWAYS);
         GridPane.setFillWidth(usernameField, true);
         grid.addRow(6, usernameLabel, usernameField);
-        
-        Label passwordLabel = new Label("Password"); 
+
+        Label passwordLabel = new Label("Password");
         passwordLabel.setPrefWidth(Region.USE_COMPUTED_SIZE);
         passwordField.setMaxWidth(Double.MAX_VALUE);
         GridPane.setHgrow(passwordField, Priority.ALWAYS);
         GridPane.setFillWidth(passwordField, true);
         grid.addRow(7, passwordLabel, passwordField);
-        
+
         grid.addRow(8, testButton, testResultText);
 
         return grid;
@@ -197,7 +198,7 @@ public class ConnectionDialog extends Dialog<ESConnection> {
                                             .or(authenticationTypeField.valueProperty().isEqualTo(AuthenticationType.BASIC)
                                                     .and(usernameField.textProperty().isEmpty()
                                                             .or(passwordField.textProperty().isEmpty()))));
-        
+
         authenticationTypeField.valueProperty().addListener((e, old, newValue) -> {
             apiKeyField.setText(null);
             usernameField.setText(null);
@@ -223,13 +224,13 @@ public class ConnectionDialog extends Dialog<ESConnection> {
             }
         });
     }
-    
+
     private void fillResult(final ESConnection filledConnection) {
         filledConnection.setName(nameField.getText());
         filledConnection.setUrl(urlField.getText());
         filledConnection.setDefaultAliasFilter(aliasFilterField.getText());
         filledConnection.setDefaultIndexFilter(indexFilterField.getText());
-        
+
         switch (authenticationTypeField.getValue()) {
             case APIKEY:
                 filledConnection.setAuthentication(new ApiKeyAuthentication(apiKeyField.getText()));
@@ -242,14 +243,14 @@ public class ConnectionDialog extends Dialog<ESConnection> {
                 break;
             default:
                 break;
-            
+
         }
     }
-    
-    private static enum AuthenticationType {
+
+    private enum AuthenticationType {
         NONE,
         BASIC,
         APIKEY
     }
-    
+
 }
