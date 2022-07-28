@@ -2,6 +2,8 @@ package com.github.ormfux.esi.ui.component;
 
 import com.github.ormfux.esi.model.table.JsonDataRow;
 import com.github.ormfux.esi.model.table.JsonDataTable;
+import com.github.ormfux.esi.service.JsonService;
+import com.github.ormfux.simple.di.InjectionContext;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ContextMenu;
@@ -180,7 +182,9 @@ public class JsonTableView extends Pagination {
 
         if (!selectedRows.isEmpty()) {
             final JsonDataRow selectedRow = selectedRows.get(0);
-            putValueInClipboard(selectedRow.getRowNode().toPrettyString());
+            final JsonService jsonService = InjectionContext.getBean(JsonService.class);
+
+            putValueInClipboard(jsonService.writeValueAsPrettyString(selectedRow.getRowNode()));
         }
     }
 
