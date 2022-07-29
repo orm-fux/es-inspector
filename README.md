@@ -102,13 +102,15 @@ The search results are displayed at the bottom of the query view. They are shown
 
 You can export the search results with the export button in the top right corner of the results view. You have the option to export them as JSON file or as CSV file. When exporting as CSV the order of rows is the same as currently shown in the table view.
 
+If the raw result is too big for display you'll see a correpsonding message in the result field. You still have the option to export the result to file.
+
 ![Raw JSON Result](images/result-view_raw.png)
 
 In the tree view you can copy a sub-tree by selecting it and using the keyboard shortcut `Ctrl+C`. It will be copied as JSON String.
 
 ![Tree Result](images/result-view_tree.png)
 
-The table view allows you to re-order the columns via drag-&-drop of the column headers, as well as sorting by column by clicking on the column headers. The CSV export does not reflect the re-ordered columns, but will respect the row sorting.
+The table view allows you to re-order the columns via drag-&-drop of the column headers, as well as sorting by column by clicking on the column headers. The CSV export does not reflect the re-ordered columns, but will respect the row sorting. The value of the selected cell can be copied using the keyboard shortcut `Ctrl+C`. A second option is to use the context menu to copy the value or the whole row. The row will be put as JSON string into your clipboard.
 
 ![Table Result](images/result-view_table.png)
 
