@@ -102,7 +102,7 @@ The search results are displayed at the bottom of the query view. They are shown
 
 You can export the search results with the export button in the top right corner of the results view. You have the option to export them as JSON file or as CSV file. When exporting as CSV the order of rows is the same as currently shown in the table view.
 
-If the raw result is too big for display you'll see a correpsonding message in the result field. You still have the option to export the result to file.
+If the raw result is too big for display you'll see a corresponding message in the result field. You still have the option to export the result to file.
 
 ![Raw JSON Result](images/result-view_raw.png)
 
