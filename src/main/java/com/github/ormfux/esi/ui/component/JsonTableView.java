@@ -116,7 +116,7 @@ public class JsonTableView extends Pagination {
     private void fillPage(final int pageIndex) {
         if (tableData != null) {
             final int startIndex = pageIndex * pageSize;
-            final int endIndex = (pageIndex +1) * pageSize;
+            final int endIndex = (pageIndex + 1) * pageSize;
 
             final List<JsonDataRow> rowData = tableData.getRows();
 
