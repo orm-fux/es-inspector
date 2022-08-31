@@ -114,7 +114,7 @@ public class JsonNodeTree extends TreeItem<String> {
                 }
             }
 
-        } else if (jsonNode.isObject()) {
+        } else if (jsonNode.isObject() && (!lazyStatus.isLazyItem() || getChildren().isEmpty())) {
             final Iterator<Entry<String, JsonNode>> grandChildIterator = jsonNode.fields();
 
             while (grandChildIterator.hasNext()) {
@@ -122,7 +122,6 @@ public class JsonNodeTree extends TreeItem<String> {
                 getChildren().add(new JsonNodeTree(grandChildNode.getValue(), grandChildNode.getKey(), currentLevel + 1, lazyLevel));
                 childrenAdded = true;
             }
-
         }
 
         return childrenAdded;
