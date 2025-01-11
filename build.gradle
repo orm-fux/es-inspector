@@ -13,7 +13,7 @@ group = 'com.github.orm-fux'
 mainClassName = 'com.github.ormfux.esi.ESInspectorMain'
 
 ext {
-    javafxVersion = '12.0.1'
+    javafxVersion = '17.0.13'
 }
 
 dependencies {
@@ -33,6 +33,13 @@ dependencies {
     //implementation group: 'org.openjfx', name: 'javafx-fxml', version: javafxVersion, classifier: 'mac'
     //implementation group: 'org.openjfx', name: 'javafx-web', version: javafxVersion, classifier: 'mac'
     implementation group: 'org.openjfx', name: 'javafx-media', version: javafxVersion, classifier: 'mac'
+
+    implementation group: 'org.openjfx', name: 'javafx-base', version: javafxVersion, classifier: 'mac-aarch64'
+    implementation group: 'org.openjfx', name: 'javafx-graphics', version: javafxVersion, classifier: 'mac-aarch64'
+    implementation group: 'org.openjfx', name: 'javafx-controls', version: javafxVersion, classifier: 'mac-aarch64'
+    //implementation group: 'org.openjfx', name: 'javafx-fxml', version: javafxVersion, classifier: 'mac-aarch64'
+    //implementation group: 'org.openjfx', name: 'javafx-web', version: javafxVersion, classifier: 'mac-aarch64'
+    implementation group: 'org.openjfx', name: 'javafx-media', version: javafxVersion, classifier: 'mac-aarch64'
 
     implementation group: 'org.openjfx', name: 'javafx-base', version: javafxVersion, classifier: 'linux'
     implementation group: 'org.openjfx', name: 'javafx-graphics', version: javafxVersion, classifier: 'linux'
@@ -77,7 +84,7 @@ distributions {
             into('lib') {
                 from jar
                 from(project.configurations.runtimeClasspath) {
-                    exclude 'javafx-**-mac.jar', 'javafx-**-linux.jar'
+                    exclude 'javafx-**-mac.jar', 'javafx-**-mac-aarch64.jar', 'javafx-**-linux.jar'
                 }
             }
             
@@ -96,7 +103,26 @@ distributions {
             into('lib') {
                 from jar
                 from(project.configurations.runtimeClasspath) {
-                    exclude 'javafx-**-linux.jar', 'javafx-**-win.jar'
+                    exclude 'javafx-**-linux.jar', 'javafx-**-mac-aarch64.jar', 'javafx-**-win.jar'
+                }
+            }
+            
+            into('bin') {
+                from startScripts {
+                    exclude 'es-inspector.bat'
+                }
+            }
+        }
+    }
+    
+    macAarch64 {
+        distributionBaseName = 'es-inspector-mac-aarch64'
+        
+        contents {
+            into('lib') {
+                from jar
+                from(project.configurations.runtimeClasspath) {
+                    exclude 'javafx-**-linux.jar', 'javafx-**-mac.jar', 'javafx-**-win.jar'
                 }
             }
             
@@ -115,7 +141,7 @@ distributions {
             into('lib') {
                 from jar
                 from(project.configurations.runtimeClasspath) {
-                    exclude 'javafx-**-mac.jar', 'javafx-**-win.jar'
+                    exclude 'javafx-**-mac.jar', 'javafx-**-mac-aarch64.jar', 'javafx-**-win.jar'
                 }
             }
             
